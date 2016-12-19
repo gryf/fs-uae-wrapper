@@ -2,6 +2,9 @@
 FS-UAE Wrapper
 ==============
 
+.. image:: https://travis-ci.org/gryf/fs-uae-wrapper.svg?branch=master
+    :target: https://travis-ci.org/gryf/fs-uae-wrapper
+
 This little utility is a wrapper on great FS-UAE_ emulator, to perform some
 actions, like uncompressing archived files (CD ROMs images, filesystems),
 launch the emulator and archive emulator save state.
