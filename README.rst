@@ -11,6 +11,11 @@ provide configuration for each game, but want to keep ISO images with
 corresponding files in archive (due to size of those images) than FS-UAE
 Wrapper is a way to achieve this.
 
+The reason behind writing this wrapper is a need for having a portable set of
+games/systems where there would be a way for storing the state of either entire
+filesystem or just console state (in case of CD³²) and keeping size small,
+preferably in a archive file vs a bunch of files.
+
 Requirements
 ============
 
