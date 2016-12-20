@@ -19,7 +19,7 @@ def get_wrapper_from_conf(conf):
     with open(conf) as fobj:
         for line in fobj.readlines():
             if WRAPPER_KEY in line and '=' in line:
-                key, val = parse_options(line)
+                key, val = parse_option(line)
                 if key == WRAPPER_KEY:
                     break
         else:
@@ -28,7 +28,7 @@ def get_wrapper_from_conf(conf):
     return val
 
 
-def parse_options(string):
+def parse_option(string):
     """
     Return parsed option as an key/value tuple, where key is an stripped
     from dash option name and the value is an value stripped of whitespace.
@@ -44,7 +44,8 @@ def parse_options(string):
         val = val.strip()
     elif string.startswith('--'):
         key = string[2:].strip()
-        val = 1
+        # parameters are always as strings - parse them when need it later
+        val = '1'
 
     return key, val
 
@@ -58,7 +59,7 @@ def parse_args():
     fs_uae_options = []
     wrapper_options = {}
     for parameter in sys.argv[1:]:
-        key, val = parse_options(parameter)
+        key, val = parse_option(parameter)
         if key is not None and val is not None:
             if key == WRAPPER_KEY:
                 wrapper_options[key] = val
@@ -98,16 +99,22 @@ def run():
     if not config_file:
         sys.stderr.write('Error: Configuration file not found\nSee --help'
                          ' for usage\n')
-        sys.exit(10)
+        sys.exit(1)
 
     wrapper_module = wrapper_options.get(WRAPPER_KEY)
     if not wrapper_module:
-        wrapper_module = get_wrapper_from_conf(wrapper_options)
+        wrapper_module = get_wrapper_from_conf(config_file)
 
     if not wrapper_module:
         wrapper = importlib.import_module('fs_uae_wrapper.plain')
     else:
-        wrapper = importlib.import_module('fs_uae_wrapper.' + wrapper_module)
+        try:
+            wrapper = importlib.import_module('fs_uae_wrapper.' +
+                                              wrapper_module)
+        except ImportError:
+            sys.stderr.write("Error: provided wrapper module: `%s' doesn't"
+                             "exists.\n" % wrapper_module)
+            sys.exit(2)
 
     wrapper.run(config_file, fs_uae_options, wrapper_options)
 
