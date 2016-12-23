@@ -112,7 +112,7 @@ def run():
             wrapper = importlib.import_module('fs_uae_wrapper.' +
                                               wrapper_module)
         except ImportError:
-            sys.stderr.write("Error: provided wrapper module: `%s' doesn't"
+            sys.stderr.write("Error: provided wrapper module: `%s' doesn't "
                              "exists.\n" % wrapper_module)
             sys.exit(2)
 
