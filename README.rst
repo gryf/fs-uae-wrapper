@@ -81,6 +81,14 @@ Modules
 
 For now, only for ``cd32`` module exists, but there are planned couple more.
 
+plain
+-----
+
+``Plain`` module is kind of dummy or failsafe if you will, since all it do is
+run ``fs-uae`` with provided configuration and command line options. It will be
+chosen in case when there is no ``wrapper`` option provided neither via the
+configuration file nor command line parameter.
+
 cd32
 ----
 
