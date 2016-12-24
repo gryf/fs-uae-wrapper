@@ -1,10 +1,5 @@
 from unittest import TestCase
-try:
-    import tkinter as tk
-    from tkinter import ttk
-except ImportError:
-    import Tkinter as tk
-    import ttk
+import os
 
 try:
     from unittest import mock
@@ -12,6 +7,14 @@ except ImportError:
     import mock
 
 from fs_uae_wrapper import message
+
+if os.environ.get('DISPLAY'):
+    try:
+        import tkinter as tk
+        from tkinter import ttk
+    except ImportError:
+        import Tkinter as tk
+        import ttk
 
 
 class TestMessage(TestCase):
@@ -44,25 +47,26 @@ class TestMessage(TestCase):
         msg._process.join.assert_called_once()
 
 
-class TestSpawn(TestCase):
+if os.environ.get('DISPLAY'):
+    # Tkinter needs graphic environment for the widgets
+    class TestSpawn(TestCase):
 
-    @mock.patch('fs_uae_wrapper.message.MessageGui.__call__')
-    def test_spawn(self, call):
-        self.assertIsNone(message._spawn(''))
-        call.assert_called_once()
+        @mock.patch('fs_uae_wrapper.message.MessageGui.__call__')
+        def test_spawn(self, call):
+            self.assertIsNone(message._spawn(''))
+            call.assert_called_once()
 
+    class TestMessageGui(TestCase):
 
-class TestMessageGui(TestCase):
+        def test_gui(self):
+            msg = message.MessageGui(msg='display that')
+            self.assertIsInstance(msg, tk.Tk)
+            self.assertIsInstance(msg.frame, ttk.Frame)
+            label = next(iter(msg.frame.children.values()))
+            self.assertEqual(label.cget('text'), 'display that')
 
-    def test_gui(self):
-        msg = message.MessageGui(msg='display that')
-        self.assertIsInstance(msg, tk.Tk)
-        self.assertIsInstance(msg.frame, ttk.Frame)
-        label = next(iter(msg.frame.children.values()))
-        self.assertEqual(label.cget('text'), 'display that')
-
-    @mock.patch('fs_uae_wrapper.message.tk.Tk.mainloop')
-    def test_call(self, tkmain):
-        msg = message.MessageGui(msg='display that')
-        msg()
-        tkmain.assert_called_once()
+        @mock.patch('fs_uae_wrapper.message.tk.Tk.mainloop')
+        def test_call(self, tkmain):
+            msg = message.MessageGui(msg='display that')
+            msg()
+            tkmain.assert_called_once()
