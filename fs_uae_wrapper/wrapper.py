@@ -6,26 +6,9 @@ emulator, if appropriate option is enabled.
 import importlib
 import os
 import sys
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
 
-
-WRAPPER_KEY = 'wrapper'
-
-
-def get_config_options(conf):
-    """Read config file and return options as a dict"""
-    parser = configparser.SafeConfigParser()
-    try:
-        parser.read(conf)
-    except configparser.ParsingError:
-        # Configuration syntax is wrong
-        return None
-
-    return {key: val for section in parser.sections()
-            for key, val in parser.items(section)}
+from fs_uae_wrapper import utils
+from fs_uae_wrapper import WRAPPER_KEY
 
 
 def parse_option(string):
@@ -101,7 +84,7 @@ def run():
                          ' for usage\n')
         sys.exit(1)
 
-    configuration = get_config_options(config_file)
+    configuration = utils.get_config_options(config_file)
 
     if configuration is None:
         sys.stderr.write('Error: Configuration file have syntax issues\n')

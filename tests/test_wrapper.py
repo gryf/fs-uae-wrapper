@@ -28,50 +28,6 @@ class TestWrapper(TestCase):
         os.unlink(self.fname)
         sys.argv = self._argv[:]
 
-    def test_get_config_options(self):
-
-        configs = ["[conf]\nwrapper=foo\n",
-                   "[conf]\n wrapper =foo\n",
-                   "[conf]\n wrapper =    foo\n",
-                   "[conf]\nwrapper = foo    \n"]
-
-        for cfg in configs:
-            with open(self.fname, 'w') as fobj:
-                fobj.write(cfg)
-
-            val = wrapper.get_config_options(self.fname)
-            self.assertDictEqual(val, {'wrapper': 'foo'})
-
-        with open(self.fname, 'w') as fobj:
-            fobj.write("[conf]\nwraper=foo\n")
-        conf = wrapper.get_config_options(self.fname)
-        self.assertDictEqual(conf, {'wraper': 'foo'})
-
-        with open(self.fname, 'w') as fobj:
-            fobj.write("[conf]\nwrapper\n")
-        conf = wrapper.get_config_options(self.fname)
-        self.assertIsNone(conf)
-
-        with open(self.fname, 'w') as fobj:
-            fobj.write("[conf]\nfullscreen = 1\n")
-        conf = wrapper.get_config_options(self.fname)
-        self.assertDictEqual(conf, {'fullscreen': '1'})
-
-        with open(self.fname, 'w') as fobj:
-            fobj.write("[conf]\nwrapper= = = something went wrong\n")
-        conf = wrapper.get_config_options(self.fname)
-        self.assertDictEqual(conf, {'wrapper': '= = something went wrong'})
-
-        with open(self.fname, 'w') as fobj:
-            fobj.write("[conf]\nwrapper = =    \n")
-        conf = wrapper.get_config_options(self.fname)
-        self.assertDictEqual(conf, {'wrapper': '='})
-
-        with open(self.fname, 'w') as fobj:
-            fobj.write("[conf]\nwrapper =     \n")
-        conf = wrapper.get_config_options(self.fname)
-        self.assertDictEqual(conf, {'wrapper': ''})
-
     @mock.patch('fs_uae_wrapper.plain.run')
     def test_run(self, mock_plain_run):
 
