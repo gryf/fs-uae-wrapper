@@ -28,7 +28,7 @@ class Plain(object):
         return
 
 
-def run(config_file, fs_uae_options, _):
+def run(config_file, fs_uae_options, _, unused):
     """Run fs-uae with provided config file and options"""
 
     runner = Plain()

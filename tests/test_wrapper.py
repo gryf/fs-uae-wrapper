@@ -28,7 +28,7 @@ class TestWrapper(TestCase):
         os.unlink(self.fname)
         sys.argv = self._argv[:]
 
-    def test_get_wrapper_from_conf_positive(self):
+    def test_get_config_options(self):
 
         configs = ["[conf]\nwrapper=foo\n",
                    "[conf]\n wrapper =foo\n",
@@ -39,32 +39,38 @@ class TestWrapper(TestCase):
             with open(self.fname, 'w') as fobj:
                 fobj.write(cfg)
 
-            val = wrapper.get_wrapper_from_conf(self.fname)
-            self.assertEqual(val, 'foo')
+            val = wrapper.get_config_options(self.fname)
+            self.assertDictEqual(val, {'wrapper': 'foo'})
 
-    def test_get_wrapper_from_conf_negative(self):
+        with open(self.fname, 'w') as fobj:
+            fobj.write("[conf]\nwraper=foo\n")
+        conf = wrapper.get_config_options(self.fname)
+        self.assertDictEqual(conf, {'wraper': 'foo'})
 
-        configs = ["[conf]\nwraper=foo\n",
-                   "[conf]\nwrapper\n",
-                   "[conf]\nfullscreen = 1\n"]
+        with open(self.fname, 'w') as fobj:
+            fobj.write("[conf]\nwrapper\n")
+        conf = wrapper.get_config_options(self.fname)
+        self.assertIsNone(conf)
 
-        for cfg in configs:
-            with open(self.fname, 'w') as fobj:
-                fobj.write(cfg)
+        with open(self.fname, 'w') as fobj:
+            fobj.write("[conf]\nfullscreen = 1\n")
+        conf = wrapper.get_config_options(self.fname)
+        self.assertDictEqual(conf, {'fullscreen': '1'})
 
-            val = wrapper.get_wrapper_from_conf(self.fname)
-            self.assertIsNone(val)
+        with open(self.fname, 'w') as fobj:
+            fobj.write("[conf]\nwrapper= = = something went wrong\n")
+        conf = wrapper.get_config_options(self.fname)
+        self.assertDictEqual(conf, {'wrapper': '= = something went wrong'})
 
-        configs2 = [("[conf]\nwrapper= = = something went wrong\n",
-                     "= = something went wrong"),
-                    ("[conf]\nwrapper = =    \n", "="),
-                    ("[conf]\nwrapper =     \n", "")]
-        for cfg, result in configs2:
-            with open(self.fname, 'w') as fobj:
-                fobj.write(cfg)
+        with open(self.fname, 'w') as fobj:
+            fobj.write("[conf]\nwrapper = =    \n")
+        conf = wrapper.get_config_options(self.fname)
+        self.assertDictEqual(conf, {'wrapper': '='})
 
-            val = wrapper.get_wrapper_from_conf(self.fname)
-            self.assertEqual(val, result)
+        with open(self.fname, 'w') as fobj:
+            fobj.write("[conf]\nwrapper =     \n")
+        conf = wrapper.get_config_options(self.fname)
+        self.assertDictEqual(conf, {'wrapper': ''})
 
     @mock.patch('fs_uae_wrapper.plain.run')
     def test_run(self, mock_plain_run):
@@ -92,6 +98,14 @@ class TestWrapper(TestCase):
 
         # This will obviously fail for nonexistent module
         sys.argv.append('--wrapper=dummy_wrapper')
+        self.assertRaises(SystemExit, wrapper.run)
+
+    def test_run_wrong_conf(self):
+
+        os.chdir(self.dirname)
+        with open('Config.fs-uae', 'w') as fobj:
+            fobj.write('foo\n')
+
         self.assertRaises(SystemExit, wrapper.run)
 
     def test_parse_option(self):

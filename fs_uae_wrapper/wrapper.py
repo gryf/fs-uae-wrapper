@@ -6,26 +6,26 @@ emulator, if appropriate option is enabled.
 import importlib
 import os
 import sys
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 
 WRAPPER_KEY = 'wrapper'
 
 
-def get_wrapper_from_conf(conf):
-    """
-    Process config file only for 'wrapper' option. Specific wrapper modules
-    can reread the file, looking for specific for wrapper module options.
-    """
-    with open(conf) as fobj:
-        for line in fobj.readlines():
-            if WRAPPER_KEY in line and '=' in line:
-                key, val = parse_option(line)
-                if key == WRAPPER_KEY:
-                    break
-        else:
-            val = None
+def get_config_options(conf):
+    """Read config file and return options as a dict"""
+    parser = configparser.SafeConfigParser()
+    try:
+        parser.read(conf)
+    except configparser.ParsingError:
+        # Configuration syntax is wrong
+        return None
 
-    return val
+    return {key: val for section in parser.sections()
+            for key, val in parser.items(section)}
 
 
 def parse_option(string):
@@ -101,9 +101,15 @@ def run():
                          ' for usage\n')
         sys.exit(1)
 
+    configuration = get_config_options(config_file)
+
+    if configuration is None:
+        sys.stderr.write('Error: Configuration file have syntax issues\n')
+        sys.exit(2)
+
     wrapper_module = wrapper_options.get(WRAPPER_KEY)
     if not wrapper_module:
-        wrapper_module = get_wrapper_from_conf(config_file)
+        wrapper_module = configuration.get(WRAPPER_KEY)
 
     if not wrapper_module:
         wrapper = importlib.import_module('fs_uae_wrapper.plain')
@@ -114,9 +120,9 @@ def run():
         except ImportError:
             sys.stderr.write("Error: provided wrapper module: `%s' doesn't "
                              "exists.\n" % wrapper_module)
-            sys.exit(2)
+            sys.exit(3)
 
-    wrapper.run(config_file, fs_uae_options, wrapper_options)
+    wrapper.run(config_file, fs_uae_options, wrapper_options, configuration)
 
 
 if __name__ == "__main__":
