@@ -11,17 +11,19 @@ import sys
 class Plain(object):
     """Class for run fs-uae"""
 
-    def run(self, conf, fs_uae_options):
+    def run(self, conf_file, fs_uae_options):
         """
         Run the emulation.
-        conf is a path to the configuration,
+        conf_file is a path to the configuration,
         fs_uae_options is a list contains tokenized options to be passed to
                        fs-uae
         """
         try:
-            subprocess.call(['fs-uae'] + [conf] + fs_uae_options)
+            subprocess.call(['fs-uae'] + [conf_file] + fs_uae_options)
         except subprocess.CalledProcessError:
             sys.stderr.write('Warning: fs-uae returned non 0 exit code\n')
+            return False
+        return True
 
     def clean(self):
         """In this class, do nothing on exit"""
@@ -33,6 +35,6 @@ def run(config_file, fs_uae_options, _, unused):
 
     runner = Plain()
     try:
-        runner.run(config_file, fs_uae_options)
+        return runner.run(config_file, fs_uae_options)
     finally:
         runner.clean()

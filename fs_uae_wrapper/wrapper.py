@@ -122,7 +122,9 @@ def run():
                              "exists.\n" % wrapper_module)
             sys.exit(3)
 
-    wrapper.run(config_file, fs_uae_options, wrapper_options, configuration)
+    if not wrapper.run(config_file, fs_uae_options, wrapper_options,
+                       configuration):
+        sys.exit(4)
 
 
 if __name__ == "__main__":
