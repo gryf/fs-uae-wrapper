@@ -61,7 +61,7 @@ def parse_args():
     for parameter in sys.argv[1:]:
         key, val = parse_option(parameter)
         if key is not None and val is not None:
-            if key == WRAPPER_KEY:
+            if WRAPPER_KEY in key:
                 wrapper_options[key] = val
             else:
                 fs_uae_options.append(parameter)
