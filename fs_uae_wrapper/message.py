@@ -51,9 +51,10 @@ class Message(object):
 
     def close(self):
         """Terminate the process with gui"""
-        if self._process.is_alive():
-            self._process.terminate()
-        self._process.join()
+        if self._process:
+            if self._process.is_alive():
+                self._process.terminate()
+            self._process.join()
 
 
 def _spawn(msg):
