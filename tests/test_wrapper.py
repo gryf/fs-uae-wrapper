@@ -64,32 +64,14 @@ class TestWrapper(TestCase):
 
         self.assertRaises(SystemExit, wrapper.run)
 
-    def test_parse_option(self):
-
-        # commandline origin
-        self.assertEqual(wrapper.parse_option('--fullscreen'),
-                         ('fullscreen', '1'))
-
-        self.assertEqual(wrapper.parse_option('--fade_out_duration=0'),
-                         ('fade_out_duration', '0'))
-
-        # pass the wrong parameter to fs-uae
-        self.assertEqual(wrapper.parse_option('-typo=true'), ('-typo', 'true'))
-
-        # pass the wrong parameter to fs-uae again
-        self.assertEqual(wrapper.parse_option('typo=true'), ('typo', 'true'))
-
-        # We have no idea what to do with this - might be a conf file
-        self.assertEqual(wrapper.parse_option('this-is-odd'), (None, None))
-
     def test_parse_args(self):
 
         # Looking for configuration file... first, we have nothing
-        self.assertEqual(wrapper.parse_args(), (None, [], {}))
+        self.assertEqual(wrapper.parse_args(), (None, {}))
 
         # still no luck - nonexistent file
         sys.argv.append('there-is-no-config.fs-uae')
-        self.assertEqual(wrapper.parse_args(), (None, [], {}))
+        self.assertEqual(wrapper.parse_args(), (None, {}))
 
         # lets make it
         os.chdir(self.dirname)
@@ -97,7 +79,7 @@ class TestWrapper(TestCase):
             fobj.write('\n')
 
         self.assertEqual(wrapper.parse_args(),
-                         ('there-is-no-config.fs-uae', [], {}))
+                         ('there-is-no-config.fs-uae', {}))
 
         # remove argument, try to find default one
         sys.argv.pop()
@@ -106,7 +88,7 @@ class TestWrapper(TestCase):
         with open('Config.fs-uae', 'w') as fobj:
             fobj.write('\n')
 
-        self.assertEqual(wrapper.parse_args(), ('Config.fs-uae', [], {}))
+        self.assertEqual(wrapper.parse_args(), ('Config.fs-uae', {}))
 
         # add --wrapper-foo and --wrapper-bar options
         sys.argv.extend(['--wrapper=plain', '--wrapper_foo=1',
@@ -118,12 +100,11 @@ class TestWrapper(TestCase):
         with open('Config.fs-uae', 'w') as fobj:
             fobj.write('\n')
 
-        conf, fsopts, wrapopts = wrapper.parse_args()
+        conf, fsopts = wrapper.parse_args()
         self.assertEqual(conf, 'Config.fs-uae')
-        self.assertListEqual(fsopts, [])
-        self.assertDictEqual(wrapopts, {'wrapper': 'plain',
-                                        'wrapper_foo': '1',
-                                        'wrapper_bar': 'false'})
+        self.assertDictEqual(fsopts, {'wrapper': 'plain',
+                                      'wrapper_foo': '1',
+                                      'wrapper_bar': 'false'})
 
         # mix wrapper* params in commandline and config
         sys.argv = ['fs-uae-wrapper',
@@ -134,8 +115,9 @@ class TestWrapper(TestCase):
         with open('Config.fs-uae', 'w') as fobj:
             fobj.write('[conf]\nwrapper = cd32\nwrapper_foo = /some/path\n')
 
-        conf, fsopts, wrapopts = wrapper.parse_args()
+        conf, fsopts = wrapper.parse_args()
         self.assertEqual(conf, 'Config.fs-uae')
-        self.assertListEqual(fsopts, ['--fullscreen', '--fast_memory=4096'])
-        self.assertDictEqual(wrapopts, {'wrapper': 'plain',
-                                        'wrapper_bar': 'false'})
+        self.assertDictEqual(fsopts, {'wrapper': 'plain',
+                                      'wrapper_bar': 'false',
+                                      'fullscreen': '1',
+                                      'fast_memory': '4096'})

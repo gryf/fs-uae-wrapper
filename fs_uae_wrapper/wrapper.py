@@ -11,51 +11,24 @@ from fs_uae_wrapper import utils
 from fs_uae_wrapper import WRAPPER_KEY
 
 
-def parse_option(string):
-    """
-    Return parsed option as an key/value tuple, where key is an stripped
-    from dash option name and the value is an value stripped of whitespace.
-    """
-    key = val = None
-
-    if '=' in string:
-        key, val = string.split('=', 1)
-        if key.startswith('--'):
-            key = key[2:].strip()
-        else:
-            key = key.strip()
-        val = val.strip()
-    elif string.startswith('--'):
-        key = string[2:].strip()
-        # parameters are always as strings - parse them when need it later
-        val = '1'
-
-    return key, val
-
-
 def parse_args():
     """
     Look out for config file and for config options which would be blindly
     passed to fs-uae.
     """
     fs_conf = None
-    fs_uae_options = []
-    wrapper_options = {}
+    options = utils.CmdOption()
     for parameter in sys.argv[1:]:
-        key, val = parse_option(parameter)
-        if key is not None and val is not None:
-            if WRAPPER_KEY in key:
-                wrapper_options[key] = val
-            else:
-                fs_uae_options.append(parameter)
-        else:
+        try:
+            options.add(parameter)
+        except AttributeError:
             if os.path.exists(parameter):
                 fs_conf = parameter
 
     if fs_conf is None and os.path.exists('Config.fs-uae'):
         fs_conf = 'Config.fs-uae'
 
-    return fs_conf, fs_uae_options, wrapper_options
+    return fs_conf, options
 
 
 def usage():
@@ -73,9 +46,9 @@ def usage():
 
 def run():
     """run wrapper module"""
-    config_file, fs_uae_options, wrapper_options = parse_args()
+    config_file, cmd_options = parse_args()
 
-    if '--help' in fs_uae_options:
+    if 'help' in cmd_options:
         usage()
         sys.exit(0)
 
@@ -90,7 +63,7 @@ def run():
         sys.stderr.write('Error: Configuration file have syntax issues\n')
         sys.exit(2)
 
-    wrapper_module = wrapper_options.get(WRAPPER_KEY)
+    wrapper_module = cmd_options.get(WRAPPER_KEY)
     if not wrapper_module:
         wrapper_module = configuration.get(WRAPPER_KEY)
 
@@ -105,8 +78,7 @@ def run():
                              "exists.\n" % wrapper_module)
             sys.exit(3)
 
-    if not wrapper.run(config_file, fs_uae_options, wrapper_options,
-                       configuration):
+    if not wrapper.run(config_file, cmd_options, configuration):
         sys.exit(4)
 
 
