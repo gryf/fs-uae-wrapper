@@ -4,6 +4,11 @@ from tempfile import mkstemp, mkdtemp
 from unittest import TestCase
 import shutil
 
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
 from fs_uae_wrapper import utils
 
 
@@ -67,6 +72,50 @@ class TestUtils(TestCase):
         conf = utils.get_config_options(self.fname)
         self.assertDictEqual(conf, {'wrapper': ''})
 
+    def test_extract_archive(self):
+
+        os.chdir(self.dirname)
+
+        # No config
+        self.assertFalse(utils.extract_archive('non-existend.7z', False, ''))
+
+        # Archive type not known
+        with open('unsupported-archive.ace', 'w') as fobj:
+            fobj.write("\n")
+        self.assertFalse(utils.extract_archive('unsupported-archive.ace',
+                                               False, ''))
+
+        # archive is known, but extraction will fail - we have an empty
+        # archive and there is no guarantee, that 7z exists on system where
+        # test will run
+        with open('supported-archive.7z', 'w') as fobj:
+            fobj.write("\n")
+        self.assertFalse(utils.extract_archive('supported-archive.7z',
+                                               False, ''))
+
+    @mock.patch('subprocess.check_call')
+    def test_extract_archive_positive(self, sp_check_call):
+
+        os.chdir(self.dirname)
+        # archive is known, and extraction should succeed
+        arch_name = 'archive.7z'
+        with open(arch_name, 'w') as fobj:
+            fobj.write("\n")
+        self.assertTrue(utils.extract_archive(arch_name, False, ''))
+        sp_check_call.assert_called_once_with(utils.ARCHIVERS['.7z'] +
+                                              [arch_name])
+
+    def test_merge_all_options(self):
+
+        conf = {'foo': '1', 'bar': 'zip'}
+        other = {'foo': '2', 'baz': '3'}
+
+        merged = utils.merge_all_options(conf, other)
+
+        self.assertDictEqual(merged, {'foo': '2', 'bar': 'zip', 'baz': '3'})
+        self.assertDictEqual(conf, {'foo': '1', 'bar': 'zip'})
+        self.assertDictEqual(other, {'foo': '2', 'baz': '3'})
+
 
 class TestCmdOptions(TestCase):
 
@@ -99,3 +148,34 @@ class TestCmdOptions(TestCase):
         self.assertDictEqual(cmd, {'fullscreen': '1', 'fast_memory': '4096'})
         self.assertListEqual(sorted(cmd.list()),
                              ['--fast_memory=4096', '--fullscreen'])
+
+    @mock.patch('os.getenv')
+    @mock.patch('os.path.expandvars')
+    @mock.patch('distutils.spawn.find_executable')
+    def test_interpolate_variables(self, find_exe, expandv, getenv):
+
+        itrpl = utils.interpolate_variables
+
+        string = 'foo = $CONFIG/../path/to/smth'
+        self.assertEqual(itrpl(string, '/home/user/Config.fs-uae'),
+                         'foo = /home/user/../path/to/smth')
+        string = 'bar = $HOME'
+        expandv.return_value = '/home/user'
+        self.assertEqual(itrpl(string, '/home/user/Config.fs-uae'),
+                         'bar = /home/user')
+
+        string = 'foo = $APP/$EXE'
+        find_exe.return_value = '/usr/bin/fs-uae'
+        self.assertEqual(itrpl(string, '/home/user/Config.fs-uae'),
+                         'foo = /usr/bin/fs-uae//usr/bin/fs-uae')
+
+        string = 'docs = $DOCUMENTS'
+        getenv.return_value = '/home/user/Docs'
+        self.assertEqual(itrpl(string, '/home/user/Config.fs-uae'),
+                         'docs = /home/user/Docs')
+
+        string = 'baz = $BASE'
+        self.assertEqual(itrpl(string, '/home/user/Config.fs-uae'),
+                         'baz = $BASE')
+        self.assertEqual(itrpl(string, '/home/user/Config.fs-uae', 'base'),
+                         'baz = base')

@@ -10,7 +10,7 @@ try:
 except ImportError:
     import ConfigParser as configparser
 
-from fs_uae_wrapper import WRAPPER_KEY
+from fs_uae_wrapper import message
 
 
 ARCHIVERS = {'.tar': ['tar', 'xf'],
@@ -68,7 +68,7 @@ def get_config_options(conf):
             for key, val in parser.items(section)}
 
 
-def extract_archive(arch_name):
+def extract_archive(arch_name, show_gui_message, message_text):
     """
     Extract provided archive to current directory
     """
@@ -85,28 +85,20 @@ def extract_archive(arch_name):
         sys.stderr.write("Unable find archive type for `%s'.\n" % arch_name)
         return False
 
+    msg = message.Message("Extracting files for `%s'. Please be "
+                          "patient" % message_text)
+    if show_gui_message == '1':
+        msg.show()
+
     try:
         subprocess.check_call(cmd + [arch_name])
     except subprocess.CalledProcessError:
         sys.stderr.write("Error during extracting archive `%s'.\n" % arch_name)
+        msg.close()
         return False
 
+    msg.close()
     return True
-
-
-def merge_wrapper_options(configuration, wrapper_options):
-    """
-    Merge dictionaries with wrapper options into one. Commandline options
-    have precedence.
-    """
-    options = {}
-    for key, val in configuration:
-        if WRAPPER_KEY in key:
-            options[key] = val
-
-    options.update(wrapper_options)
-
-    return options
 
 
 def merge_all_options(configuration, commandline):
@@ -114,12 +106,8 @@ def merge_all_options(configuration, commandline):
     Merge dictionaries with wrapper options into one. Commandline options
     have precedence.
     """
-    options = {}
-    for key, val in configuration.items():
-        options[key] = val
-
+    options = configuration.copy()
     options.update(commandline)
-
     return options
 
 
