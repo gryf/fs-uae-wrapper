@@ -23,6 +23,11 @@ Requirements
 ============
 
 - Python (2 or 3)
+- `fs-uae`_ (obviously :)
+
+
+Also, there should be at one of the (de)compression utility, for example:
+
 - `7z`_ archiver
 - `unrar`_
 
@@ -33,7 +38,7 @@ Just perform (preferably in ``virtualenv``) a command:
 
 .. code:: shell-session
 
-   $ pip install fs-uae-wrapper
+   $ pip install fs-uae-wrapper (not there yet)
 
 Usage
 =====
@@ -79,10 +84,15 @@ executable as-is.
 Modules
 =======
 
-For now, only for ``cd32`` module exists, but there are planned couple more.
+For now, only ``plain`` and ``cd32`` modules exists, although there are planned
+couple more.
 
 plain
 -----
+
+Options used:
+
+* None
 
 ``Plain`` module is kind of dummy or failsafe if you will, since all it do is
 run ``fs-uae`` with provided configuration and command line options. It will be
@@ -92,14 +102,23 @@ configuration file nor command line parameter.
 cd32
 ----
 
-There are few assumptions regarding file names and archives. Let's see some
-sample config for a game, which is saved as ``ChaosEngine.fs-uae``:
+Options used:
+
+* ``wrapper`` (required) with ``cd32`` as an value
+* ``wrapper_archive`` (required) path to the archive with CD32 iso/cue/wav
+* ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
+  message during extracting files
+
+There is one assumption regarding archives file. Let's see some sample config
+for a game, which is saved as ``ChaosEngine.fs-uae``:
 
 .. code:: ini
    :number-lines:
 
    [config]
    wrapper = cd32
+   wrapper_archive = ChaosEngine.7z
+   wrapper_gui_msg = 1
 
    amiga_model = CD32
    title = The Chaos Engine CD32
@@ -111,11 +130,16 @@ sample config for a game, which is saved as ``ChaosEngine.fs-uae``:
    joystick_port_1_mode = cd32 gamepad
    platform = cd32
 
-First assumption is that archive containing files for the game (here: *Chaos
-Engine*) should not be in subdirectory. Second, archive name should be the same
-as a cue file, so in this case it should be like ``Chaos Engine, The
-(1994)(Renegade)(M4)[!][CDD3445].zip`` in case of zip archive. There are three
-archive types supported: 7z, rar and zip.
+Assumption is that archive containing files for the game (here: *Chaos
+Engine*) should not be in subdirectory. In other words, all essential files
+(like ``*.cue``, ``*.iso`` and ``*.wav`` files) should be located directly in
+the archive, otherwise it might be impossible to create right configuration and
+debugging such setup might be annoying.
+
+There are several archive types which are supported, ranging from tar
+(compressed with gzip, bzip2 and xz), 7z, rar, zip. lha and lzx. All of those
+formats should have corresponding decompressors available in the system,
+otherwise extracting will fail.
 
 Next, the invocation of the wrapper would be as follows:
 
@@ -146,7 +170,7 @@ License
 
 This work is licensed on 3-clause BSD license. See LICENSE file for details.
 
-..  _FS-UAE: https://fs-uae.net/
+.. _fs-uae: https://fs-uae.net/
 .. _relative configuration file: https://fs-uae.net/configuration-files
 .. _unrar: http://www.rarlab.com/rar_add.htm
 .. _7z: http://p7zip.sourceforge.net/
