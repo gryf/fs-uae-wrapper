@@ -25,6 +25,36 @@ ARCHIVERS = {'.tar': ['tar', 'xf'],
              '.lzx':  ['unlzx']}
 
 
+class CmdOption(dict):
+    """
+    Holder class for commandline switches.
+    """
+
+    def add(self, option):
+        """parse and add option to the dictionary"""
+        if not option.startswith('--'):
+            raise AttributeError("Cannot add option `%s' to the dictionary" %
+                                 option)
+        if '=' in option:
+            key, val = option.split('=', 1)
+            key = key[2:].strip()
+            self[key] = val.strip()
+        else:
+            key = option[2:].strip()
+            # parameters are always as options - parse them when need it later
+            self[key] = '1'
+
+    def list(self):
+        """Return list of options as it was passed through the commandline"""
+        ret_list = []
+        for key, val in self.items():
+            if val != '1':
+                ret_list.append('--%(k)s=%(v)s' % {'k': key, 'v': val})
+            else:
+                ret_list.append('--%(k)s' % {'k': key})
+        return ret_list
+
+
 def get_config_options(conf):
     """Read config file and return options as a dict"""
     parser = configparser.SafeConfigParser()
@@ -79,32 +109,16 @@ def merge_wrapper_options(configuration, wrapper_options):
     return options
 
 
-def options_to_dict(commandline):
-    """
-    "Parse" commandline switches and return them as dictionary
-    """
-    options = {}
-    for option in commandline:
-        if option.startswith('--'):
-            if '=' in option:
-                key, val = option[2:].split('=')
-                options[key.strip()] = val.strip()
-            else:
-                options[option[2:].strip()] = '1'
-
-    return options
-
-
 def merge_all_options(configuration, commandline):
     """
     Merge dictionaries with wrapper options into one. Commandline options
     have precedence.
     """
     options = {}
-    for key, val in configuration:
+    for key, val in configuration.items():
         options[key] = val
 
-    options.update(options_to_dict(commandline))
+    options.update(commandline)
 
     return options
 
@@ -170,20 +184,25 @@ def get_config(conf_file):
     for path, conf_dir in paths:
         if os.path.exists(path):
             config = get_config_options(path)
-            config.update(get_config_options(conf_file))
+            if config is None:
+                continue
+            conf = get_config_options(conf_file) or {}
+            config.update(conf)
             break
     else:
         conf_dir = None
-        config = get_config_options(conf_file)
+        config = get_config_options(conf_file) or {}
 
     if 'base_dir' in config:
         base_dir = interpolate_variables(config['base_dir'], conf_file)
         host = os.path.join(base_dir, 'Configurations/Host.fs-uae')
 
         if os.path.exists(host):
-            config.update(get_config_options(host))
+            host_conf = get_config_options(host) or {}
+            config.update(host_conf)
             # overwrite host options again via provided custom/relative conf
-            config.update(get_config_options(conf_file))
+            conf = get_config_options(conf_file) or {}
+            config.update(conf)
     elif conf_dir:
         config['_base_dir'] = conf_dir
 

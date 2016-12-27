@@ -66,3 +66,36 @@ class TestUtils(TestCase):
             fobj.write("[conf]\nwrapper =     \n")
         conf = utils.get_config_options(self.fname)
         self.assertDictEqual(conf, {'wrapper': ''})
+
+
+class TestCmdOptions(TestCase):
+
+    def test_add(self):
+
+        cmd = utils.CmdOption()
+
+        # commandline origin
+        cmd.add('--fullscreen')
+        self.assertEqual(cmd['fullscreen'], '1')
+
+        cmd.add('--fade_out_duration=0')
+        self.assertEqual(cmd['fade_out_duration'], '0')
+
+        # pass the wrong parameter to fs-uae
+        self.assertRaises(AttributeError, cmd.add, '-typo=0')
+
+        # pass the wrong parameter to fs-uae again
+        self.assertRaises(AttributeError, cmd.add, 'typo=true')
+
+        # We have no idea what to do with this - might be a conf file
+        self.assertRaises(AttributeError, cmd.add, 'this-is-odd')
+
+    def test_list(self):
+
+        cmd = utils.CmdOption()
+        cmd.add('--fullscreen')
+        cmd.add('--fast_memory=4096')
+
+        self.assertDictEqual(cmd, {'fullscreen': '1', 'fast_memory': '4096'})
+        self.assertListEqual(cmd.list(),
+                             ['--fullscreen', '--fast_memory=4096'])
