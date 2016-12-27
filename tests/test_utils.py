@@ -97,5 +97,5 @@ class TestCmdOptions(TestCase):
         cmd.add('--fast_memory=4096')
 
         self.assertDictEqual(cmd, {'fullscreen': '1', 'fast_memory': '4096'})
-        self.assertListEqual(cmd.list(),
-                             ['--fullscreen', '--fast_memory=4096'])
+        self.assertListEqual(sorted(cmd.list()),
+                             ['--fast_memory=4096', '--fullscreen'])
