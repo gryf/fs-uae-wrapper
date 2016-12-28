@@ -92,6 +92,10 @@ def extract_archive(arch_name, show_gui_message, message_text):
 
     try:
         subprocess.check_call(cmd + [arch_name])
+    except OSError:
+        sys.stderr.write("Error executing `%s'.\n" % cmd)
+        msg.close()
+        return False
     except subprocess.CalledProcessError:
         sys.stderr.write("Error during extracting archive `%s'.\n" % arch_name)
         msg.close()
