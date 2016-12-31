@@ -90,3 +90,30 @@ class TestCD32(TestCase):
         self.assertTrue(acd32._copy_conf())
         self.assertTrue(os.path.exists(os.path.join(self.dirname,
                                                     'Config.fs-uae')))
+
+    @mock.patch('fs_uae_wrapper.utils.extract_archive')
+    def test_extract(self, utils_extract):
+
+        acd32 = cd32.CD32()
+        acd32.arch_filepath = self.fname
+        acd32.dir = self.dirname
+
+        utils_extract.return_value = False
+
+        # message for the gui is taken from title in fs-uae conf or, if there
+        # is no such entry, use archive name, which is mandatory to provide
+        acd32.all_options = {'title': 'foo_game'}
+        self.assertFalse(acd32._extract())
+        utils_extract.assert_called_once_with(self.fname, None, 'foo_game')
+
+        utils_extract.reset_mock()
+        acd32.all_options = {'wrapper_archive': 'arch.7z'}
+        self.assertFalse(acd32._extract())
+        utils_extract.assert_called_once_with(self.fname, None, 'arch.7z')
+
+        # lets pretend, the extracting has succeed.
+        utils_extract.reset_mock()
+        acd32.all_options['wrapper_gui_msg'] = '1'
+        utils_extract.return_value = False
+        self.assertFalse(acd32._extract())
+        utils_extract.assert_called_once_with(self.fname, '1', 'arch.7z')
