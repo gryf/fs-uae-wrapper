@@ -80,3 +80,13 @@ class TestCD32(TestCase):
         acd32.set_assets_paths()
         full_path = os.path.join(self.dirname, 'Config_save.7z')
         self.assertEqual(acd32.save_filename, full_path)
+
+    def test_copy_conf(self):
+
+        acd32 = cd32.CD32()
+        acd32.conf_file = self.fname
+        acd32.dir = self.dirname
+
+        self.assertTrue(acd32._copy_conf())
+        self.assertTrue(os.path.exists(os.path.join(self.dirname,
+                                                    'Config.fs-uae')))

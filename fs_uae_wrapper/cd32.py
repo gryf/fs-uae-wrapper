@@ -141,10 +141,11 @@ class CD32(object):
 
         curdir = os.path.abspath('.')
         os.chdir(self.dir)
-        utils.extract_archive(self.arch_filepath,
-                              self.all_options.get('wrapper_gui_msg'), item)
+        result = utils.extract_archive(self.arch_filepath,
+                                       self.all_options.get('wrapper_gui_msg'),
+                                       item)
         os.chdir(curdir)
-        return True
+        return result
 
     def _run_game(self, fs_uae_options):
         """execute game in provided directory"""
