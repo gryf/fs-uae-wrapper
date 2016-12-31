@@ -10,7 +10,6 @@ name.
 """
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 
@@ -151,11 +150,7 @@ class CD32(object):
         """execute game in provided directory"""
         curdir = os.path.abspath('.')
         os.chdir(self.dir)
-        try:
-            subprocess.call(['fs-uae'] + fs_uae_options)
-        except subprocess.CalledProcessError:
-            sys.stderr.write('Warning: fs-uae returned non 0 exit code\n')
-
+        utils.run_command(['fs-uae'] + fs_uae_options)
         os.chdir(curdir)
         return True
 
@@ -170,11 +165,10 @@ class CD32(object):
         if os.path.exists(self.save_filename):
             os.unlink(self.save_filename)
 
-        try:
-            subprocess.call(['7z', 'a', self.save_filename,
-                             os.path.join(self.dir, 'fs-uae-save')])
-        except subprocess.CalledProcessError:
-            sys.stderr.write('Warning: archiving save state failed\n')
+        code = utils.run_command(['7z', 'a', self.save_filename,
+                                  os.path.join(self.dir, 'fs-uae-save')])
+        if code != 0:
+            sys.stderr.write('Error: archiving save state failed\n')
             return False
 
         return True
@@ -188,12 +182,7 @@ class CD32(object):
 
         curdir = os.path.abspath('.')
         os.chdir(self.dir)
-        try:
-            subprocess.call(['7z', 'x', self.save_filename])
-        except subprocess.CalledProcessError:
-            sys.stderr.write('Warning: extracting archive with save state '
-                             'failed\n')
-
+        utils.run_command(['7z', 'x', self.save_filename])
         os.chdir(curdir)
         return True
 

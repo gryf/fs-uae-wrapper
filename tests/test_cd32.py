@@ -1,7 +1,6 @@
 import os
 import sys
 import shutil
-import subprocess
 from tempfile import mkstemp, mkdtemp
 from unittest import TestCase
 
@@ -18,6 +17,7 @@ class TestCD32(TestCase):
     def setUp(self):
         fd, self.fname = mkstemp()
         self.dirname = mkdtemp()
+        self.confdir = mkdtemp()
         os.close(fd)
         self._argv = sys.argv[:]
         sys.argv = ['fs-uae-wrapper']
@@ -27,6 +27,10 @@ class TestCD32(TestCase):
         os.chdir(self.curdir)
         try:
             shutil.rmtree(self.dirname)
+        except OSError:
+            pass
+        try:
+            shutil.rmtree(self.confdir)
         except OSError:
             pass
         os.unlink(self.fname)
@@ -119,17 +123,62 @@ class TestCD32(TestCase):
         self.assertFalse(acd32._extract())
         utils_extract.assert_called_once_with(self.fname, '1', 'arch.7z')
 
-    @mock.patch('subprocess.call')
-    def test_run_game(self, sub_call):
+    @mock.patch('fs_uae_wrapper.utils.run_command')
+    def test_run_game(self, run):
 
         acd32 = cd32.CD32()
         acd32.dir = self.dirname
 
         self.assertTrue(acd32._run_game([]))
-        sub_call.assert_called_once_with(['fs-uae'])
+        run.assert_called_once_with(['fs-uae'])
 
         # Errors from emulator are not fatal to wrappers
-        sub_call.reset_mock()
-        sub_call.side_effect = subprocess.CalledProcessError(2, 'fs-uae')
+        run.reset_mock()
+        run.return_value = False
         self.assertTrue(acd32._run_game([]))
-        sub_call.assert_called_once_with(['fs-uae'])
+        run.assert_called_once_with(['fs-uae'])
+
+    @mock.patch('fs_uae_wrapper.utils.run_command')
+    def test_save_save(self, run):
+
+        acd32 = cd32.CD32()
+        acd32.dir = self.dirname
+        acd32.save_filename = "foobar_save.7z"
+        run.return_value = 0
+
+        self.assertTrue(acd32._save_save())
+
+        os.chdir(self.confdir)
+        with open(acd32.save_filename, 'w') as fobj:
+            fobj.write('asd')
+
+        self.assertTrue(acd32._save_save())
+
+        os.mkdir(os.path.join(self.dirname, 'fs-uae-save'))
+        self.assertTrue(acd32._save_save())
+
+        run.return_value = 1
+        self.assertFalse(acd32._save_save())
+
+    @mock.patch('fs_uae_wrapper.utils.run_command')
+    def test_load_save(self, run):
+
+        acd32 = cd32.CD32()
+        acd32.dir = self.dirname
+        acd32.save_filename = "foobar_save.7z"
+        run.return_value = 0
+
+        # fail to load save is not fatal
+        self.assertTrue(acd32._load_save())
+
+        os.chdir(self.confdir)
+        with open(acd32.save_filename, 'w') as fobj:
+            fobj.write('asd')
+
+        self.assertTrue(acd32._load_save())
+        run.assert_called_once_with(['7z', 'x', acd32.save_filename])
+
+        # failure in searching for archiver are also non fatal
+        run.reset_mock()
+        run.return_value = 1
+        self.assertTrue(acd32._save_save())

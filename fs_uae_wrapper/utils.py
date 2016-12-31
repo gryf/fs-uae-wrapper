@@ -3,6 +3,7 @@ Misc utilities
 """
 from distutils import spawn
 import os
+import six
 import subprocess
 import sys
 try:
@@ -102,6 +103,24 @@ def extract_archive(arch_name, show_gui_message, message_text):
         return False
 
     msg.close()
+    return True
+
+
+def run_command(cmd):
+    """
+    Run provided command. Return true if command execution returns zero exit
+    code, false otherwise. If cmd is a string, there would be an attempt to
+    split it up for subprocess call method.
+    """
+
+    if isinstance(six.text_type(cmd), six.string_types):
+        cmd = cmd.split()
+
+    code = subprocess.call(cmd)
+    if code != 0:
+        sys.stderr.write('Command `{0}` returned non 0 exit '
+                         'code\n'.format(cmd[0]))
+        return False
     return True
 
 
