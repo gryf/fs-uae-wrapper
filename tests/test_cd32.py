@@ -1,8 +1,9 @@
 import os
 import sys
+import shutil
+import subprocess
 from tempfile import mkstemp, mkdtemp
 from unittest import TestCase
-import shutil
 
 try:
     from unittest import mock
@@ -117,3 +118,18 @@ class TestCD32(TestCase):
         utils_extract.return_value = False
         self.assertFalse(acd32._extract())
         utils_extract.assert_called_once_with(self.fname, '1', 'arch.7z')
+
+    @mock.patch('subprocess.call')
+    def test_run_game(self, sub_call):
+
+        acd32 = cd32.CD32()
+        acd32.dir = self.dirname
+
+        self.assertTrue(acd32._run_game([]))
+        sub_call.assert_called_once_with(['fs-uae'])
+
+        # Errors from emulator are not fatal to wrappers
+        sub_call.reset_mock()
+        sub_call.side_effect = subprocess.CalledProcessError(2, 'fs-uae')
+        self.assertTrue(acd32._run_game([]))
+        sub_call.assert_called_once_with(['fs-uae'])
