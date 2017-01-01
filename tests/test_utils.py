@@ -77,21 +77,19 @@ class TestUtils(TestCase):
         os.chdir(self.dirname)
 
         # No config
-        self.assertFalse(utils.extract_archive('non-existend.7z', False, ''))
+        self.assertFalse(utils.extract_archive('non-existend.7z'))
 
         # Archive type not known
         with open('unsupported-archive.ace', 'w') as fobj:
             fobj.write("\n")
-        self.assertFalse(utils.extract_archive('unsupported-archive.ace',
-                                               False, ''))
+        self.assertFalse(utils.extract_archive('unsupported-archive.ace'))
 
         # archive is known, but extraction will fail - we have an empty
         # archive and there is no guarantee, that 7z exists on system where
         # test will run
         with open('supported-archive.7z', 'w') as fobj:
             fobj.write("\n")
-        self.assertFalse(utils.extract_archive('supported-archive.7z',
-                                               False, ''))
+        self.assertFalse(utils.extract_archive('supported-archive.7z'))
 
     @mock.patch('subprocess.check_call')
     def test_extract_archive_positive(self, sp_check_call):
@@ -101,7 +99,7 @@ class TestUtils(TestCase):
         arch_name = 'archive.7z'
         with open(arch_name, 'w') as fobj:
             fobj.write("\n")
-        self.assertTrue(utils.extract_archive(arch_name, False, ''))
+        self.assertTrue(utils.extract_archive(arch_name))
         sp_check_call.assert_called_once_with(utils.ARCHIVERS['.7z'] +
                                               [arch_name])
 

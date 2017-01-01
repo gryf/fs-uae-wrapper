@@ -68,7 +68,7 @@ def get_config_options(conf):
             for key, val in parser.items(section)}
 
 
-def extract_archive(arch_name, show_gui_message, message_text):
+def extract_archive(arch_name, title=''):
     """
     Extract provided archive to current directory
     """
@@ -86,8 +86,8 @@ def extract_archive(arch_name, show_gui_message, message_text):
         return False
 
     msg = message.Message("Extracting files for `%s'. Please be "
-                          "patient" % message_text)
-    if show_gui_message == '1':
+                          "patient" % title)
+    if title:
         msg.show()
 
     try:
