@@ -165,9 +165,8 @@ class CD32(object):
         if os.path.exists(self.save_filename):
             os.unlink(self.save_filename)
 
-        code = utils.run_command(['7z', 'a', self.save_filename,
-                                  os.path.join(self.dir, 'fs-uae-save')])
-        if code != 0:
+        if not utils.run_command(['7z', 'a', self.save_filename,
+                                  os.path.join(self.dir, 'fs-uae-save')]):
             sys.stderr.write('Error: archiving save state failed\n')
             return False
 

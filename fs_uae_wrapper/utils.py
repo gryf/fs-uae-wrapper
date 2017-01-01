@@ -3,7 +3,6 @@ Misc utilities
 """
 from distutils import spawn
 import os
-import six
 import subprocess
 import sys
 try:
@@ -109,11 +108,12 @@ def extract_archive(arch_name, show_gui_message, message_text):
 def run_command(cmd):
     """
     Run provided command. Return true if command execution returns zero exit
-    code, false otherwise. If cmd is a string, there would be an attempt to
-    split it up for subprocess call method.
+    code, false otherwise. If cmd is not a list, there would be an attempt to
+    split it up for subprocess call method. May throw exception if cmd is not
+    a list neither a string.
     """
 
-    if isinstance(six.text_type(cmd), six.string_types):
+    if not isinstance(cmd, list):
         cmd = cmd.split()
 
     code = subprocess.call(cmd)

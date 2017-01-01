@@ -144,7 +144,7 @@ class TestCD32(TestCase):
         acd32 = cd32.CD32()
         acd32.dir = self.dirname
         acd32.save_filename = "foobar_save.7z"
-        run.return_value = 0
+        run.return_value = True
 
         self.assertTrue(acd32._save_save())
 
@@ -157,7 +157,7 @@ class TestCD32(TestCase):
         os.mkdir(os.path.join(self.dirname, 'fs-uae-save'))
         self.assertTrue(acd32._save_save())
 
-        run.return_value = 1
+        run.return_value = False
         self.assertFalse(acd32._save_save())
 
     @mock.patch('fs_uae_wrapper.utils.run_command')
