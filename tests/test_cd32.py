@@ -37,154 +37,58 @@ class TestCD32(TestCase):
         os.unlink(self.fname)
         sys.argv = self._argv[:]
 
-    def test_clean(self):
+    def test_validate_options(self):
 
         acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
-        acd32.clean()
-        self.assertTrue(os.path.exists(self.dirname))
+        self.assertFalse(acd32._validate_options())
 
-        acd32.dir = self.dirname
-        acd32.clean()
-        self.assertFalse(os.path.exists(self.dirname))
+        acd32.all_options['wrapper'] = 'cd32'
+        self.assertFalse(acd32._validate_options())
 
-    @mock.patch('fs_uae_wrapper.utils.get_config')
-    def test_kickstart_option(self, get_config):
+        acd32.all_options['wrapper_archive'] = 'fake.tgz'
+        self.assertTrue(acd32._validate_options())
 
-        acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
-        get_config.return_value = {'foo': 'bar'}
-        self.assertDictEqual(acd32._kickstart_option(), {})
+    @mock.patch('fs_uae_wrapper.base.Base._save_save')
+    @mock.patch('fs_uae_wrapper.base.Base._run_emulator')
+    @mock.patch('fs_uae_wrapper.base.Base._kickstart_option')
+    @mock.patch('fs_uae_wrapper.base.Base._load_save')
+    @mock.patch('fs_uae_wrapper.base.Base._copy_conf')
+    @mock.patch('fs_uae_wrapper.base.Base._extract')
+    def test_run(self, extr, cconf, lsave, kick, runemul, ssave):
 
-        get_config.return_value = {'kickstarts_dir': '/some/path'}
-        self.assertDictEqual(acd32._kickstart_option(),
-                             {'kickstarts_dir': '/some/path'})
+        extr.return_value = False
+        cconf.return_value = False
+        lsave.return_value = False
+        kick.return_value = {}
+        runemul.return_value = False
+        ssave.return_value = False
 
-        os.chdir(self.dirname)
-        get_config.return_value = {'kickstarts_dir': '../some/path'}
-        result = os.path.abspath(os.path.join(self.dirname, '../some/path'))
-        self.assertDictEqual(acd32._kickstart_option(),
-                             {'kickstarts_dir': result})
+        try:
+            acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
+            self.assertFalse(acd32.run())
 
-        acd32.conf_file = os.path.join(self.dirname, 'Config.fs-uae')
-        get_config.return_value = {'kickstarts_dir': '$CONFIG/../path'}
-        result = os.path.abspath(os.path.join(self.dirname, '../path'))
-        self.assertDictEqual(acd32._kickstart_option(),
-                             {'kickstarts_dir': result})
+            acd32.all_options = {'wrapper': 'cd32',
+                                 'wrapper_archive': 'fake.tgz'}
 
-    def test_set_assets_paths(self):
+            self.assertFalse(acd32.run())
 
-        acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
-        os.chdir(self.dirname)
-        acd32.conf_file = 'Config.fs-uae'
-        acd32.all_options = {'wrapper_archive': 'foo.7z'}
+            extr.return_value = True
+            self.assertFalse(acd32.run())
 
-        acd32._set_assets_paths()
-        full_path = os.path.join(self.dirname, 'Config_save.7z')
-        self.assertEqual(acd32.save_filename, full_path)
+            cconf.return_value = True
+            self.assertFalse(acd32.run())
 
-        acd32.all_options = {'wrapper_archive': '/home/user/foo.7z'}
+            lsave.return_value = True
+            self.assertTrue(acd32.run())
 
-        acd32._set_assets_paths()
-        full_path = os.path.join(self.dirname, 'Config_save.7z')
-        self.assertEqual(acd32.save_filename, full_path)
+            kick.return_value = {'foo': 'bar'}
+            self.assertTrue(acd32.run())
+            self.assertDictEqual(acd32.fsuae_options, {'foo': 'bar'})
 
-    def test_copy_conf(self):
+            runemul.return_value = True
+            self.assertFalse(acd32.run())
 
-        acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
-        acd32.conf_file = self.fname
-        acd32.dir = self.dirname
-
-        self.assertTrue(acd32._copy_conf())
-        self.assertTrue(os.path.exists(os.path.join(self.dirname,
-                                                    'Config.fs-uae')))
-
-    @mock.patch('fs_uae_wrapper.utils.extract_archive')
-    def test_extract(self, utils_extract):
-
-        acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
-        acd32.arch_filepath = self.fname
-        acd32.dir = self.dirname
-
-        utils_extract.return_value = False
-
-        # message for the gui is taken from title in fs-uae conf or, if there
-        # is no such entry, use archive name, which is mandatory to provide
-        acd32.all_options = {'title': 'foo_game',
-                             'wrapper_gui_msg': '1'}
-        self.assertFalse(acd32._extract())
-        utils_extract.assert_called_once_with(self.fname, 'foo_game')
-
-        utils_extract.reset_mock()
-        acd32.all_options = {'wrapper_archive': 'arch.tar',
-                             'wrapper_gui_msg': '1'}
-        self.assertFalse(acd32._extract())
-        utils_extract.assert_called_once_with(self.fname, 'arch.tar')
-
-        # lets pretend, the extracting has failed
-        utils_extract.reset_mock()
-        acd32.all_options = {'wrapper_gui_msg': '0'}
-        utils_extract.return_value = False
-        self.assertFalse(acd32._extract())
-        utils_extract.assert_called_once_with(self.fname, '')
-
-    @mock.patch('fs_uae_wrapper.utils.run_command')
-    def test_run_emulator(self, run):
-
-        acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
-        acd32.dir = self.dirname
-
-        self.assertTrue(acd32._run_emulator([]))
-        run.assert_called_once_with(['fs-uae'])
-
-        # Errors from emulator are not fatal to wrappers
-        run.reset_mock()
-        run.return_value = False
-        self.assertTrue(acd32._run_emulator([]))
-        run.assert_called_once_with(['fs-uae'])
-
-    @mock.patch('fs_uae_wrapper.base.Base._get_saves_dir')
-    @mock.patch('fs_uae_wrapper.utils.run_command')
-    def test_save_save(self, run, saves_dir):
-
-        acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
-        acd32.dir = self.dirname
-        acd32.save_filename = 'foobar_save.7z'
-        saves_dir.acd32.save_filenamereturn_value = None
-        run.return_value = True
-
-        self.assertTrue(acd32._save_save())
-
-        saves_dir.return_value = acd32.save_filename
-        os.chdir(self.confdir)
-        with open(acd32.save_filename, 'w') as fobj:
-            fobj.write('asd')
-
-        self.assertTrue(acd32._save_save())
-
-        os.mkdir(os.path.join(self.dirname, 'fs-uae-save'))
-        self.assertTrue(acd32._save_save())
-
-        run.return_value = False
-        self.assertFalse(acd32._save_save())
-
-    @mock.patch('fs_uae_wrapper.utils.run_command')
-    def test_load_save(self, run):
-
-        acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
-        acd32.dir = self.dirname
-        acd32.save_filename = "foobar_save.7z"
-        run.return_value = 0
-
-        # fail to load save is not fatal
-        self.assertTrue(acd32._load_save())
-
-        os.chdir(self.confdir)
-        with open(acd32.save_filename, 'w') as fobj:
-            fobj.write('asd')
-
-        self.assertTrue(acd32._load_save())
-        run.assert_called_once_with(['7z', 'x', acd32.save_filename])
-
-        # failure in searching for archiver are also non fatal
-        run.reset_mock()
-        run.return_value = 1
-        self.assertTrue(acd32._save_save())
+            ssave.return_value = True
+            self.assertTrue(acd32.run())
+        finally:
+            acd32.clean()

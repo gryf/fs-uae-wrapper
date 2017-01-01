@@ -177,7 +177,7 @@ class Base(object):
             return None
 
         save_path = os.path.join(self.dir, save)
-        if not os.path.exists(save_path):
+        if not os.path.exists(save_path) or not os.path.isdir(save_path):
             return None
 
         return save_path
@@ -188,3 +188,4 @@ class Base(object):
             sys.stderr.write("Configuration lacks of required "
                              "`wrapper' option.\n")
             return False
+        return True

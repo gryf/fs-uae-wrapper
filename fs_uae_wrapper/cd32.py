@@ -54,11 +54,6 @@ class CD32(base.Base):
     def _validate_options(self):
         validation_result = super(CD32, self)._validate_options()
 
-        validation_result = True
-
-        if not super(CD32, self)._validate_options():
-            validation_result = False
-
         if 'wrapper_archive' not in self.all_options:
             sys.stderr.write("Configuration lacks of required "
                              "`wrapper_archive' option.\n")
