@@ -72,7 +72,64 @@ class TestUtils(TestCase):
         conf = utils.get_config_options(self.fname)
         self.assertDictEqual(conf, {'wrapper': ''})
 
+    @mock.patch('fs_uae_wrapper.file_archive.Archive.extract')
+    @mock.patch('fs_uae_wrapper.file_archive.Archive.create')
+    @mock.patch('fs_uae_wrapper.message.Message.close')
+    @mock.patch('fs_uae_wrapper.message.Message.show')
+    def test_operate_archive(self, show, close, create, extract):
+
+        os.chdir(self.dirname)
+
+        # No config
+        self.assertFalse(utils.operate_archive('non-existend.7z', 'foo', ''))
+
+        # Archive type not known
+        with open('unsupported-archive.ace', 'w') as fobj:
+            fobj.write("\n")
+        self.assertFalse(utils.operate_archive('unsupported-archive.ace',
+                                               'foo', ''))
+
+        # archive is known, but extraction will fail - we have an empty
+        # archive and there is no guarantee, that 7z exists on system where
+        # test will run
+        extract.return_value = True
+        with open('supported-archive.7z', 'w') as fobj:
+            fobj.write("\n")
+        self.assertTrue(utils.operate_archive('supported-archive.7z',
+                                              'extract', ''))
+        extract.assert_called_once()
+
+        extract.reset_mock()
+        self.assertTrue(utils.operate_archive('supported-archive.7z',
+                                              'extract', ''))
+        extract.assert_called_once()
+
+        os.unlink('supported-archive.7z')
+        self.assertTrue(utils.operate_archive('supported-archive.7z',
+                                              'create', 'test'))
+        create.assert_called_once()
+        show.assert_called_once()
+
     def test_extract_archive(self):
+
+        os.chdir(self.dirname)
+
+        # No config
+        self.assertFalse(utils.extract_archive('non-existend.7z'))
+
+        # Archive type not known
+        with open('unsupported-archive.ace', 'w') as fobj:
+            fobj.write("\n")
+        self.assertFalse(utils.extract_archive('unsupported-archive.ace'))
+
+        # archive is known, but extraction will fail - we have an empty
+        # archive and there is no guarantee, that 7z exists on system where
+        # test will run
+        with open('supported-archive.7z', 'w') as fobj:
+            fobj.write("\n")
+        self.assertFalse(utils.extract_archive('supported-archive.7z'))
+
+    def test_create_archive(self):
 
         os.chdir(self.dirname)
 

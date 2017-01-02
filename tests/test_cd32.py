@@ -29,7 +29,7 @@ class TestCD32(TestCase):
     @mock.patch('fs_uae_wrapper.base.Base._load_save')
     @mock.patch('fs_uae_wrapper.base.Base._copy_conf')
     @mock.patch('fs_uae_wrapper.base.Base._extract')
-    def test_run(self, extr, cconf, lsave, kick, runemul, ssave, *args):
+    def test_run(self, extr, cconf, lsave, kick, runemul, ssave, mkdtemp):
 
         extr.return_value = False
         cconf.return_value = False

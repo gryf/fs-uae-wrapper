@@ -57,31 +57,51 @@ def get_config_options(conf):
             for key, val in parser.items(section)}
 
 
-def extract_archive(arch_name, title=''):
+def operate_archive(arch_name, operation, text):
     """
-    Extract provided archive to current directory
+    Create archive from contents of current directory
     """
 
     archiver = file_archive.get_archiver(arch_name)
 
     if archiver is None:
-        sys.stderr.write("Unable find archive type for `%s' or executable "
-                         "doesn't exists.\n" % arch_name)
         return False
 
-    msg = message.Message("Extracting files for `%s'. Please be "
-                          "patient" % title)
-    if title:
+    msg = message.Message(text)
+    if text:
         msg.show()
 
-    res = archiver.extract(arch_name)
+    res = False
+
+    if operation == 'extract':
+        res = archiver.extract(arch_name)
+
+    if operation == 'create':
+        res = archiver.create(arch_name)
+
     msg.close()
 
-    if not res:
-        sys.stderr.write("Error extracting `%s'.\n" % arch_name)
-        return False
+    return res
 
-    return True
+
+def create_archive(arch_name, title=''):
+    """
+    Create archive from contents of current directory
+    """
+    msg = ''
+    if title:
+        msg = "Creating archive for `%s'. Please be patient" % title
+    return operate_archive(arch_name, 'create', msg)
+
+
+def extract_archive(arch_name, title=''):
+    """
+    Extract provided archive to current directory
+    """
+    msg = ''
+    if title:
+        msg = "Extracting files for `%s'. Please be patient" % title
+    return operate_archive(arch_name, 'extract', msg)
 
 
 def run_command(cmd):
