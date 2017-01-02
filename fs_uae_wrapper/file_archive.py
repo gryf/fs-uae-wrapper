@@ -112,6 +112,41 @@ class RarArchive(Archive):
         return True
 
 
+class Archivers(object):
+    """Archivers class"""
+    archivers = [{'arch': TarArchive, 'name': 'tar', 'ext': ['tar']},
+                 {'arch': TarGzipArchive, 'name': 'tgz',
+                  'ext': ['tar.gz', 'tgz']},
+                 {'arch': TarBzip2Archive, 'name': 'tar.bz2',
+                  'ext': ['tar.bz2']},
+                 {'arch': TarXzArchive, 'name': 'tar.xz', 'ext': ['tar.xz']},
+                 {'arch': RarArchive, 'name': 'rar', 'ext': ['rar']},
+                 {'arch': SevenZArchive, 'name': '7z', 'ext': ['7z']},
+                 {'arch': ZipArchive, 'name': 'zip', 'ext': ['zip']},
+                 {'arch': LhaArchive, 'name': 'lha', 'ext': ['lha', 'lzh']},
+                 {'arch': LzxArchive, 'name': 'lzx', 'ext': ['lzx']}]
+
+    @classmethod
+    def get(cls, extension):
+        """
+        Get the archive class or None
+        """
+        for arch in cls.archivers:
+            if extension in arch['ext']:
+                return arch['arch']
+        return None
+
+    @classmethod
+    def get_extension_by_name(cls, name):
+        """
+        Get the first defined extension for the archive format
+        """
+        for arch in cls.archivers:
+            if name == arch['name']:
+                return '.' + arch['ext'][0]
+        return None
+
+
 def get_archiver(arch_name):
     """Return right class for provided archive file name"""
 
@@ -122,18 +157,10 @@ def get_archiver(arch_name):
     if result:
         ext = result.groups()[0]
 
-    archivers = {'.tar': TarArchive,
-                 '.tgz': TarGzipArchive,
-                 '.tar.gz': TarGzipArchive,
-                 '.tar.bz2': TarBzip2Archive,
-                 '.tar.xz': TarXzArchive,
-                 '.rar': RarArchive,
-                 '.7z': SevenZArchive,
-                 '.zip': ZipArchive,
-                 '.lha': LhaArchive,
-                 '.lzx': LzxArchive}
+    if ext:
+        ext = ext[1:]
 
-    archiver = archivers.get(ext)
+    archiver = Archivers.get(ext)
     if not archiver:
         sys.stderr.write("Unable find archive type for `%s'\n" % arch_name)
         return None

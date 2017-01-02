@@ -7,6 +7,7 @@ import shutil
 import tempfile
 
 from fs_uae_wrapper import utils
+from fs_uae_wrapper import path
 
 
 class Base(object):
@@ -195,4 +196,15 @@ class Base(object):
             sys.stderr.write("Configuration lacks of required "
                              "`wrapper' option.\n")
             return False
+
+        if 'wrapper_archiver' not in self.all_options:
+            sys.stderr.write("Configuration lacks of required "
+                             "`wrapper_archiver' option.\n")
+            return False
+
+        if not path.which(self.all_options['wrapper_archiver']):
+            sys.stderr.write("Cannot find archiver `%s'." %
+                             self.all_options['wrapper_archiver'])
+            return False
+
         return True

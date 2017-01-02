@@ -75,13 +75,15 @@ class TestBase(TestCase):
         bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})
         os.chdir(self.dirname)
         bobj.conf_file = 'Config.fs-uae'
-        bobj.all_options = {'wrapper_archive': 'foo.7z'}
+        bobj.all_options = {'wrapper_archive': 'foo.7z',
+                            'wrapper_archiver': '7z'}
 
         bobj._set_assets_paths()
         full_path = os.path.join(self.dirname, 'Config_save.7z')
         self.assertEqual(bobj.save_filename, full_path)
 
-        bobj.all_options = {'wrapper_archive': '/home/user/foo.7z'}
+        bobj.all_options = {'wrapper_archive':  '/home/user/foo.7z',
+                            'wrapper_archiver': '7z'}
 
         bobj._set_assets_paths()
         full_path = os.path.join(self.dirname, 'Config_save.7z')
@@ -214,9 +216,12 @@ class TestBase(TestCase):
 
         os.unlink(path)
         os.mkdir(path)
-        self.assertEqual(bobj._get_saves_dir(), path)
+        self.assertEqual(bobj._get_saves_dir(), 'saves')
 
-    def test_validate_options(self):
+    @mock.patch('fs_uae_wrapper.path.which')
+    def test_validate_options(self, which):
+
+        which.return_value = None
 
         bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})
         bobj.all_options = {}
@@ -224,6 +229,15 @@ class TestBase(TestCase):
         self.assertFalse(bobj._validate_options())
 
         bobj.all_options = {'wrapper': 'dummy'}
+        self.assertFalse(bobj._validate_options())
+
+        bobj.all_options = {'wrapper': 'dummy',
+                            'wrapper_archiver': 'myarchiver'}
+        self.assertFalse(bobj._validate_options())
+
+        which.return_value = '7z'
+        bobj.all_options = {'wrapper': 'dummy',
+                            'wrapper_archiver': '7z'}
         self.assertTrue(bobj._validate_options())
 
     def test_run_clean(self):
@@ -233,7 +247,8 @@ class TestBase(TestCase):
 
         self.assertFalse(bobj.run())
 
-        bobj.all_options = {'wrapper': 'dummy'}
+        bobj.all_options = {'wrapper': 'dummy',
+                            'wrapper_archiver': 'rar'}
         try:
             self.assertTrue(bobj.run())
             self.assertTrue(os.path.exists(bobj.dir))

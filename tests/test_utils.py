@@ -72,7 +72,7 @@ class TestUtils(TestCase):
         conf = utils.get_config_options(self.fname)
         self.assertDictEqual(conf, {'wrapper': ''})
 
-    @mock.patch('fs_uae_wrapper.file_archive.which')
+    @mock.patch('fs_uae_wrapper.path.which')
     @mock.patch('fs_uae_wrapper.file_archive.Archive.extract')
     @mock.patch('fs_uae_wrapper.file_archive.Archive.create')
     @mock.patch('fs_uae_wrapper.message.Message.close')
@@ -153,7 +153,7 @@ class TestUtils(TestCase):
             fobj.write("\n")
         self.assertFalse(utils.extract_archive('supported-archive.7z'))
 
-    @mock.patch('fs_uae_wrapper.file_archive.which')
+    @mock.patch('fs_uae_wrapper.path.which')
     @mock.patch('fs_uae_wrapper.file_archive.Archive.extract')
     def test_extract_archive_positive(self, arch_extract, which):
         arch_extract.return_value = True

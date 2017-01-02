@@ -217,3 +217,8 @@ def get_config(conf_file):
         config['_base_dir'] = conf_dir
 
     return config
+
+
+def get_arch_ext(archiver_name):
+    """Return extension for the archiver"""
+    return file_archive.Archivers.get_extension_by_name(archiver_name)

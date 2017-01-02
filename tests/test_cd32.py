@@ -20,6 +20,9 @@ class TestCD32(TestCase):
         self.assertFalse(acd32._validate_options())
 
         acd32.all_options['wrapper_archive'] = 'fake.tgz'
+        self.assertFalse(acd32._validate_options())
+
+        acd32.all_options['wrapper_archiver'] = 'rar'
         self.assertTrue(acd32._validate_options())
 
     @mock.patch('tempfile.mkdtemp')
@@ -42,7 +45,8 @@ class TestCD32(TestCase):
         self.assertFalse(acd32.run())
 
         acd32.all_options = {'wrapper': 'cd32',
-                             'wrapper_archive': 'fake.tgz'}
+                             'wrapper_archive': 'fake.tgz',
+                             'wrapper_archiver': 'rar'}
 
         self.assertFalse(acd32.run())
 
