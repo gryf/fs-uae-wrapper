@@ -5,6 +5,9 @@ FS-UAE Wrapper
 .. image:: https://travis-ci.org/gryf/fs-uae-wrapper.svg?branch=master
     :target: https://travis-ci.org/gryf/fs-uae-wrapper
 
+.. image:: https://img.shields.io/pypi/v/fs-uae-wrapper.svg
+    :target: https://pypi.python.org/pypi/fs-uae-wrapper
+
 This little utility is a wrapper on great FS-UAE_ emulator, to perform some
 actions, like uncompressing archived files (CD ROMs images, filesystems),
 launch the emulator and archive emulator save state.
@@ -25,11 +28,25 @@ Requirements
 - Python (2 or 3)
 - `fs-uae`_ (obviously :)
 
+Also, there should be archivers programs available for compress/decompress
+archives. Fs-uae-wrapper supports several types of archives:
 
-Also, there should be at one of the (de)compression utility, for example:
+- `7z`_
+- `lha`_
+- `lzx`_ - decompress only
+- `rar`_ - if only ``unrar`` is available, than only decompression is supported
+- `tar`_, also compressed with:
 
-- `7z`_ archiver
-- `unrar`_
+  - bzip2
+  - gzip
+  - xz
+
+- `zip`_
+
+There are several archive types which are supported, ranging from tar
+(compressed with gzip, bzip2 and xz), 7z, rar, zip. lha and lzx. All of those
+formats should have corresponding decompressors available in the system,
+otherwise archive extraction will fail.
 
 Installation
 ============
@@ -38,7 +55,7 @@ Just perform (preferably in ``virtualenv``) a command:
 
 .. code:: shell-session
 
-   $ pip install fs-uae-wrapper (not there yet)
+   $ pip install fs-uae-wrapper
 
 Usage
 =====
@@ -84,8 +101,11 @@ executable as-is.
 Modules
 =======
 
-For now, only ``plain`` and ``cd32`` modules exists, although there are planned
-couple more.
+Currently, three wrapper modules are available:
+
+- plain
+- cd32
+- archive
 
 plain
 -----
@@ -109,8 +129,8 @@ Options used:
 * ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
   message during extracting files
 
-There is one assumption regarding archives file. Let's see some sample config
-for a game, which is saved as ``ChaosEngine.fs-uae``:
+Let's see some sample config for a game, which is saved as
+``ChaosEngine.fs-uae``:
 
 .. code:: ini
    :number-lines:
@@ -129,17 +149,6 @@ for a game, which is saved as ``ChaosEngine.fs-uae``:
 
    joystick_port_1_mode = cd32 gamepad
    platform = cd32
-
-Assumption is that archive containing files for the game (here: *Chaos
-Engine*) should not be in subdirectory. In other words, all essential files
-(like ``*.cue``, ``*.iso`` and ``*.wav`` files) should be located directly in
-the archive, otherwise it might be impossible to create right configuration and
-debugging such setup might be annoying.
-
-There are several archive types which are supported, ranging from tar
-(compressed with gzip, bzip2 and xz), 7z, rar, zip. lha and lzx. All of those
-formats should have corresponding decompressors available in the system,
-otherwise extracting will fail.
 
 Next, the invocation of the wrapper would be as follows:
 
@@ -165,6 +174,57 @@ Next, after ``fs-uae`` quit, there will:
   ``ChaosEngine_save.7z``.
 - Wipe out temporary directory
 
+archive
+-------
+
+Options used:
+
+* ``wrapper`` (required) with ``cd32`` as an value
+* ``wrapper_archive`` (required) path to the archive with assets (usually means
+  whole system directories, floppies or hd images)
+* ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
+  message during extracting files
+* ``wrapper_persist_data`` (optional) if set to "1", will compress (possibly
+  changed) data, replacing original archive
+
+Example configuration:
+
+.. code:: ini
+   :number-lines:
+
+   [config]
+   wrapper = archive
+   wrapper_archive = Workbench_3.1.tar.bz2
+   wrapper_gui_msg = 1
+   wrapper_persist_data = 1
+
+   ...
+
+And execution is as usual:
+
+.. code:: shell-session
+
+   $ fs-uae-wrapper Workbench.fs-uae
+
+This module will do several steps (similar as with ``cd32`` wrapper):
+
+- create temporary directory
+- extract provided in configuration archive
+- extract save state (if exists)
+- copy configuration under name ``Config.fs-uae``
+- run the fs-uae emulator
+- create archive with save state (if save state directory place is *not* a
+  global one)
+- optionally create new archive under the same name as the original one and
+  replace it with original one.
+
+This module is quite useful in two use cases. First is a usual work with
+Workbench, where there is a need to keep changes of filesystem. Second is the
+opposite - if there is a need to test some software, but not necessary keep it
+in a Workbench, than it will act as a temporary copy of the system, so that
+next time fs-uae will be run, there will be no files of tested software
+cluttering around.
+
 License
 =======
 
@@ -172,5 +232,9 @@ This work is licensed on 3-clause BSD license. See LICENSE file for details.
 
 .. _fs-uae: https://fs-uae.net/
 .. _relative configuration file: https://fs-uae.net/configuration-files
-.. _unrar: http://www.rarlab.com/rar_add.htm
+.. _rar: http://www.rarlab.com/rar_add.htm
 .. _7z: http://p7zip.sourceforge.net/
+.. _lha: http://lha.sourceforge.jp
+.. _lzx: http://aminet.net/package/misc/unix/unlzx.c.readme
+.. _tar: https://www.gnu.org/software/tar/
+.. _zip: http://www.info-zip.org
