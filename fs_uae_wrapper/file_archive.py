@@ -7,6 +7,24 @@ import sys
 import re
 
 
+def which(archivers):
+    """
+    Check if there selected archiver is available in the system and place it
+    to the archiver attribute
+    """
+
+    if not isinstance(archivers, list):
+        archivers = [archivers]
+
+    for fname in archivers:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = os.path.join(path.strip('"'), fname)
+            if os.path.isfile(path) and os.access(path, os.X_OK):
+                return fname
+
+    return None
+
+
 class Archive(object):
     """Base class for archive support"""
     ADD = ['a']
@@ -14,15 +32,15 @@ class Archive(object):
     ARCH = 'false'
 
     def __init__(self):
-        self.archiver = None
-        self.which()
+        self.archiver = which(self.ARCH)
+        self._compess = self.archiver
+        self._decompess = self.archiver
 
     def create(self, arch_name):
         """
-        Create archive using self.archiver and parameters in self.ADD
-        attribute
+        Create archive. Return True on success, False otherwise.
         """
-        result = subprocess.call([self.archiver] + self.ADD + [arch_name, '.'])
+        result = subprocess.call([self._compess] + self.ADD + [arch_name, '.'])
         if result != 0:
             sys.stderr.write("Unable to create archive `%s'\n" % arch_name)
             return False
@@ -30,37 +48,18 @@ class Archive(object):
 
     def extract(self, arch_name):
         """
-        Create archive using self.archiver and parameters in self.ADD
-        attribute
+        Extract archive. Return True on success, False otherwise.
         """
         if not os.path.exists(arch_name):
             sys.stderr.write("Archive `%s' doesn't exists.\n" % arch_name)
             return False
 
-        result = subprocess.call([self.archiver] + self.EXTRACT + [arch_name])
+        result = subprocess.call([self._decompess] + self.EXTRACT +
+                                 [arch_name])
         if result != 0:
             sys.stderr.write("Unable to extract archive `%s'\n" % arch_name)
             return False
         return True
-
-    def which(self):
-        """
-        Check if there selected archiver is available in the system and place
-        it to the archiver attribute
-        """
-
-        if isinstance(self.ARCH, list):
-            executables = self.ARCH
-        else:
-            executables = [self.ARCH]
-        for fname in executables:
-            for path in os.environ["PATH"].split(os.pathsep):
-                path = os.path.join(path.strip('"'), fname)
-                if os.path.isfile(path) and os.access(path, os.X_OK):
-                    self.archiver = fname
-                    return
-
-        self.archiver = None
 
 
 class TarArchive(Archive):
@@ -87,7 +86,14 @@ class LhaArchive(Archive):
 
 class ZipArchive(Archive):
     ADD = ['a', '-tzip']
-    ARCH = '7z'
+    ARCH = ['7z', 'zip']
+
+    def __init__(self):
+        super(ZipArchive, self).__init__()
+        if self.archiver == 'zip':
+            self._decompess = which('unzip')
+            ZipArchive.ADD = ['-r']
+            ZipArchive.EXTRACT = []
 
 
 class SevenZArchive(Archive):
@@ -114,7 +120,7 @@ class RarArchive(Archive):
                              'supported by unrar.\n')
             return False
 
-        result = subprocess.call([self.archiver] + self.ADD + [arch_name] +
+        result = subprocess.call([self._compess] + self.ADD + [arch_name] +
                                  sorted(os.listdir('.')))
         if result != 0:
             sys.stderr.write("Unable to create archive `%s'\n" % arch_name)
@@ -126,11 +132,11 @@ def get_archiver(arch_name):
     """Return right class for provided archive file name"""
 
     _, ext = os.path.splitext(arch_name)
-    re_tar = re.compile('.*([tT][aA][rR].[^.]+$)')
+    re_tar = re.compile('.*(.[tT][aA][rR].[^.]+$)')
     result = re_tar.match(arch_name)
 
     if result:
-        ext = result.groups[0]
+        ext = result.groups()[0]
 
     archivers = {'.tar': TarArchive,
                  '.tgz': TarGzipArchive,

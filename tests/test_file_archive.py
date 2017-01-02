@@ -61,26 +61,18 @@ class TestArchive(TestCase):
         call.assert_called_once_with(['false', 'x', 'foo'])
 
     def test_archive_which(self):
-        arch = file_archive.Archive()
-        self.assertEqual(arch.archiver, 'false')
-        arch.ARCH = 'sh'
+        self.assertEqual(file_archive.which('sh'), 'sh')
+        self.assertIsNone(file_archive.which('blahblahexec'))
+        self.assertEqual(file_archive.which(['blahblahexec', 'pip', 'sh']),
+                         'pip')
 
-        arch.which()
-        self.assertEqual(arch.archiver, 'sh')
-
-        arch.ARCH = 'blahblahexec'
-        arch.which()
-        self.assertIsNone(arch.archiver)
-
-        arch.ARCH = ['blahblahexec', 'pip', 'sh']
-        arch.which()
-        self.assertEqual(arch.archiver, 'pip')
-
-    @mock.patch('fs_uae_wrapper.file_archive.Archive.which')
+    @mock.patch('fs_uae_wrapper.file_archive.which')
     @mock.patch('subprocess.call')
     def test_tar(self, call, which):
         with open('foo', 'w') as fobj:
             fobj.write('\n')
+
+        which.return_value = 'tar'
 
         arch = file_archive.TarArchive()
         arch.archiver = 'tar'
@@ -130,11 +122,13 @@ class TestArchive(TestCase):
         self.assertFalse(arch.extract('foo'))
         call.assert_called_once_with(['tar', 'xf', 'foo'])
 
-    @mock.patch('fs_uae_wrapper.file_archive.Archive.which')
+    @mock.patch('fs_uae_wrapper.file_archive.which')
     @mock.patch('subprocess.call')
     def test_lha(self, call, which):
         with open('foo', 'w') as fobj:
             fobj.write('\n')
+
+        which.return_value = 'lha'
 
         arch = file_archive.LhaArchive()
         arch.archiver = 'lha'
@@ -148,11 +142,13 @@ class TestArchive(TestCase):
         self.assertFalse(arch.extract('foo'))
         call.assert_called_once_with(['lha', 'x', 'foo'])
 
-    @mock.patch('fs_uae_wrapper.file_archive.Archive.which')
+    @mock.patch('fs_uae_wrapper.file_archive.which')
     @mock.patch('subprocess.call')
     def test_lzx(self, call, which):
         with open('foo', 'w') as fobj:
             fobj.write('\n')
+
+        which.return_value = 'unlzx'
 
         arch = file_archive.LzxArchive()
         arch.archiver = 'unlzx'
@@ -166,11 +162,13 @@ class TestArchive(TestCase):
         self.assertFalse(arch.extract('foo'))
         call.assert_called_once_with(['unlzx', '-x', 'foo'])
 
-    @mock.patch('fs_uae_wrapper.file_archive.Archive.which')
+    @mock.patch('fs_uae_wrapper.file_archive.which')
     @mock.patch('subprocess.call')
     def test_7zip(self, call, which):
         with open('foo', 'w') as fobj:
             fobj.write('\n')
+
+        which.return_value = '7z'
 
         arch = file_archive.SevenZArchive()
         arch.archiver = '7z'
@@ -184,11 +182,13 @@ class TestArchive(TestCase):
         self.assertFalse(arch.extract('foo'))
         call.assert_called_once_with(['7z', 'x', 'foo'])
 
-    @mock.patch('fs_uae_wrapper.file_archive.Archive.which')
+    @mock.patch('fs_uae_wrapper.file_archive.which')
     @mock.patch('subprocess.call')
     def test_zip(self, call, which):
         with open('foo', 'w') as fobj:
             fobj.write('\n')
+
+        which.return_value = '7z'
 
         arch = file_archive.ZipArchive()
         arch.archiver = '7z'
@@ -202,9 +202,11 @@ class TestArchive(TestCase):
         self.assertFalse(arch.extract('foo'))
         call.assert_called_once_with(['7z', 'x', 'foo'])
 
-    @mock.patch('fs_uae_wrapper.file_archive.Archive.which')
+    @mock.patch('fs_uae_wrapper.file_archive.which')
     @mock.patch('subprocess.call')
     def test_rar(self, call, which):
+
+        which.return_value = 'rar'
 
         arch = file_archive.RarArchive()
         arch.archiver = 'rar'
@@ -233,7 +235,7 @@ class TestArchive(TestCase):
 
         call.reset_mock()
         call.return_value = 0
-        arch.archiver = 'unrar'
+        arch._compess = arch._decompess = arch.archiver = 'unrar'
 
         self.assertFalse(arch.create('foo'))
         call.assert_not_called()
