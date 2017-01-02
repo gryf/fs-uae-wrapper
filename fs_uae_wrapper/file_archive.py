@@ -6,23 +6,7 @@ import subprocess
 import sys
 import re
 
-
-def which(archivers):
-    """
-    Check if there selected archiver is available in the system and place it
-    to the archiver attribute
-    """
-
-    if not isinstance(archivers, list):
-        archivers = [archivers]
-
-    for fname in archivers:
-        for path in os.environ["PATH"].split(os.pathsep):
-            path = os.path.join(path.strip('"'), fname)
-            if os.path.isfile(path) and os.access(path, os.X_OK):
-                return fname
-
-    return None
+from fs_uae_wrapper import path
 
 
 class Archive(object):
@@ -32,7 +16,7 @@ class Archive(object):
     ARCH = 'false'
 
     def __init__(self):
-        self.archiver = which(self.ARCH)
+        self.archiver = path.which(self.ARCH)
         self._compess = self.archiver
         self._decompess = self.archiver
 
@@ -91,7 +75,7 @@ class ZipArchive(Archive):
     def __init__(self):
         super(ZipArchive, self).__init__()
         if self.archiver == 'zip':
-            self._decompess = which('unzip')
+            self._decompess = path.which('unzip')
             ZipArchive.ADD = ['-r']
             ZipArchive.EXTRACT = []
 
