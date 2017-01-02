@@ -91,8 +91,8 @@ class TestUtils(TestCase):
             fobj.write("\n")
         self.assertFalse(utils.extract_archive('supported-archive.7z'))
 
-    @mock.patch('subprocess.check_call')
-    def test_extract_archive_positive(self, sp_check_call):
+    @mock.patch('fs_uae_wrapper.file_archive.Archive.extract')
+    def test_extract_archive_positive(self, arch_extract):
 
         os.chdir(self.dirname)
         # archive is known, and extraction should succeed
@@ -100,8 +100,7 @@ class TestUtils(TestCase):
         with open(arch_name, 'w') as fobj:
             fobj.write("\n")
         self.assertTrue(utils.extract_archive(arch_name))
-        sp_check_call.assert_called_once_with(utils.ARCHIVERS['.7z'] +
-                                              [arch_name])
+        arch_extract.assert_called_once_with(arch_name)
 
     def test_merge_all_options(self):
 

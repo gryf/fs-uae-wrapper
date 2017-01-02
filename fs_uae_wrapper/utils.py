@@ -11,18 +11,7 @@ except ImportError:
     import ConfigParser as configparser
 
 from fs_uae_wrapper import message
-
-
-ARCHIVERS = {'.tar': ['tar', 'xf'],
-             '.tgz':  ['tar', 'xf'],
-             '.tar.gz':  ['tar', 'xf'],
-             '.tar.bz2':  ['tar', 'xf'],
-             '.tar.xz':  ['tar', 'xf'],
-             '.rar':  ['unrar', 'x'],
-             '.7z':  ['7z', 'x'],
-             '.zip':  ['7z', 'x'],
-             '.lha':  ['lha', 'x'],
-             '.lzx':  ['unlzx']}
+from fs_uae_wrapper import file_archive
 
 
 class CmdOption(dict):
@@ -73,16 +62,11 @@ def extract_archive(arch_name, title=''):
     Extract provided archive to current directory
     """
 
-    if not os.path.exists(arch_name):
-        sys.stderr.write("Archive `%s' doesn't exists.\n" % arch_name)
-        return False
+    archiver = file_archive.get_archiver(arch_name)
 
-    _, ext = os.path.splitext(arch_name)
-
-    cmd = ARCHIVERS.get(ext)
-
-    if cmd is None:
-        sys.stderr.write("Unable find archive type for `%s'.\n" % arch_name)
+    if archiver is None:
+        sys.stderr.write("Unable find archive type for `%s' or executable "
+                         "doesn't exists.\n" % arch_name)
         return False
 
     msg = message.Message("Extracting files for `%s'. Please be "
@@ -90,18 +74,13 @@ def extract_archive(arch_name, title=''):
     if title:
         msg.show()
 
-    try:
-        subprocess.check_call(cmd + [arch_name])
-    except OSError:
-        sys.stderr.write("Error executing `%s'.\n" % cmd)
-        msg.close()
-        return False
-    except subprocess.CalledProcessError:
-        sys.stderr.write("Error during extracting archive `%s'.\n" % arch_name)
-        msg.close()
+    res = archiver.extract(arch_name)
+    msg.close()
+
+    if not res:
+        sys.stderr.write("Error extracting `%s'.\n" % arch_name)
         return False
 
-    msg.close()
     return True
 
 
