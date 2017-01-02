@@ -21,15 +21,16 @@ class Archive(object):
         Create archive using self.archiver and parameters in self.ADD
         attribute
         """
-        return subprocess.call([self.ARCH] + self.ADD + [arch_name, '.']) == 0
+        return subprocess.call([self.archiver] + self.ADD +
+                               [arch_name, '.']) == 0
 
     def extract(self, arch_name):
         """
         Create archive using self.archiver and parameters in self.ADD
         attribute
         """
-        return subprocess.call([self.ARCH] + self.EXTRACT +
-                               [arch_name, '.']) == 0
+        return subprocess.call([self.archiver] + self.EXTRACT +
+                               [arch_name]) == 0
 
     def which(self):
         """
@@ -70,7 +71,7 @@ class TarXzArchive(TarArchive):
 
 
 class LhaArchive(Archive):
-    ARCH = ['lha']
+    ARCH = 'lha'
 
 
 class ZipArchive(Archive):
@@ -83,6 +84,7 @@ class SevenZArchive(Archive):
 
 
 class LzxArchive(Archive):
+    EXTRACT = ['-x']
     ARCH = 'unlzx'
 
     @classmethod
@@ -101,8 +103,8 @@ class RarArchive(Archive):
                              'supported by unrar.\n')
             return False
 
-        return subprocess.call([self.ARCH] + self.ADD + [arch_name,
-                                                         os.listdir('.')]) == 0
+        return subprocess.call([self.archiver] + self.ADD + [arch_name] +
+                               sorted(os.listdir('.'))) == 0
 
 
 def get_archiver(filename):
