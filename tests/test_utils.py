@@ -72,13 +72,15 @@ class TestUtils(TestCase):
         conf = utils.get_config_options(self.fname)
         self.assertDictEqual(conf, {'wrapper': ''})
 
+    @mock.patch('fs_uae_wrapper.file_archive.which')
     @mock.patch('fs_uae_wrapper.file_archive.Archive.extract')
     @mock.patch('fs_uae_wrapper.file_archive.Archive.create')
     @mock.patch('fs_uae_wrapper.message.Message.close')
     @mock.patch('fs_uae_wrapper.message.Message.show')
-    def test_operate_archive(self, show, close, create, extract):
+    def test_operate_archive(self, show, close, create, extract, which):
 
         os.chdir(self.dirname)
+        which.return_value = None
 
         # No config
         self.assertFalse(utils.operate_archive('non-existend.7z', 'foo', ''))
@@ -92,6 +94,7 @@ class TestUtils(TestCase):
         # archive is known, but extraction will fail - we have an empty
         # archive and there is no guarantee, that 7z exists on system where
         # test will run
+        which.return_value = '7z'
         extract.return_value = True
         with open('supported-archive.7z', 'w') as fobj:
             fobj.write("\n")
@@ -129,7 +132,9 @@ class TestUtils(TestCase):
             fobj.write("\n")
         self.assertFalse(utils.extract_archive('supported-archive.7z'))
 
-    def test_create_archive(self):
+    @mock.patch('fs_uae_wrapper.file_archive.Archive.create')
+    def test_create_archive(self, arch_create):
+        arch_create.return_value = True
 
         os.chdir(self.dirname)
 
@@ -148,8 +153,11 @@ class TestUtils(TestCase):
             fobj.write("\n")
         self.assertFalse(utils.extract_archive('supported-archive.7z'))
 
+    @mock.patch('fs_uae_wrapper.file_archive.which')
     @mock.patch('fs_uae_wrapper.file_archive.Archive.extract')
-    def test_extract_archive_positive(self, arch_extract):
+    def test_extract_archive_positive(self, arch_extract, which):
+        arch_extract.return_value = True
+        which.return_value = '7z'
 
         os.chdir(self.dirname)
         # archive is known, and extraction should succeed
