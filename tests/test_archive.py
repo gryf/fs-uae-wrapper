@@ -1,3 +1,6 @@
+import os
+import shutil
+from tempfile import mkdtemp
 from unittest import TestCase
 
 try:
@@ -11,6 +14,18 @@ from fs_uae_wrapper import utils
 
 class TestArchive(TestCase):
 
+    def setUp(self):
+        self.dirname = mkdtemp()
+        self.curdir = os.path.abspath(os.curdir)
+        os.chdir(self.dirname)
+
+    def tearDown(self):
+        os.chdir(self.curdir)
+        try:
+            shutil.rmtree(self.dirname)
+        except OSError:
+            pass
+
     def test_validate_options(self):
 
         arch = archive.Archive('Config.fs-uae', utils.CmdOption(), {})
@@ -23,16 +38,20 @@ class TestArchive(TestCase):
         self.assertTrue(arch._validate_options())
 
     @mock.patch('tempfile.mkdtemp')
+    @mock.patch('fs_uae_wrapper.archive.Archive._make_archive')
     @mock.patch('fs_uae_wrapper.base.Base._run_emulator')
     @mock.patch('fs_uae_wrapper.base.Base._kickstart_option')
     @mock.patch('fs_uae_wrapper.base.Base._copy_conf')
+    @mock.patch('fs_uae_wrapper.base.Base._load_save')
     @mock.patch('fs_uae_wrapper.base.Base._extract')
-    def test_run(self, extr, cconf, kick, runemul, mkdtemp):
+    def test_run(self, extr, load, copy, kick, run, march, mkdtemp):
 
         extr.return_value = False
-        cconf.return_value = False
-        kick.return_value = {}
-        runemul.return_value = False
+        load.return_value = False
+        copy.return_value = False
+        kick.return_value = False
+        run.return_value = False
+        march.return_value = False
 
         arch = archive.Archive('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(arch.run())
@@ -45,12 +64,50 @@ class TestArchive(TestCase):
         extr.return_value = True
         self.assertFalse(arch.run())
 
-        cconf.return_value = True
-        self.assertTrue(arch.run())
+        load.return_value = True
+        self.assertFalse(arch.run())
+
+        copy.return_value = True
+        self.assertFalse(arch.run())
 
         kick.return_value = {'foo': 'bar'}
-        self.assertTrue(arch.run())
+        self.assertFalse(arch.run())
         self.assertDictEqual(arch.fsuae_options, {'foo': 'bar'})
 
-        runemul.return_value = True
+        run.return_value = True
+        self.assertFalse(arch.run())
+
+        march.return_value = True
         self.assertTrue(arch.run())
+
+    @mock.patch('os.rename')
+    @mock.patch('os.unlink')
+    @mock.patch('shutil.rmtree')
+    @mock.patch('fs_uae_wrapper.utils.create_archive')
+    @mock.patch('fs_uae_wrapper.base.Base._get_title')
+    @mock.patch('fs_uae_wrapper.base.Base._save_save')
+    @mock.patch('fs_uae_wrapper.base.Base._get_saves_dir')
+    def test_make_archive(self, sdir, save, title, carch, rmt, unlink, rename):
+
+        sdir.return_value = None
+        save.return_value = False
+        title.return_value = ''
+        carch.return_value = False
+
+        arch = archive.Archive('Config.fs-uae', utils.CmdOption(), {})
+        arch.dir = self.dirname
+        arch.arch_filepath = os.path.join(self.dirname, 'foo.tgz')
+        arch.all_options = {}
+        self.assertTrue(arch._make_archive())
+
+        arch.all_options['wrapper_persist_data'] = '1'
+        self.assertFalse(arch._make_archive())
+
+        carch.return_value = True
+        self.assertTrue(arch._make_archive())
+
+        sdir.return_value = '/some/path'
+        self.assertFalse(arch._make_archive())
+
+        save.return_value = True
+        self.assertTrue(arch._make_archive())

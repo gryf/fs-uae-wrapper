@@ -4,9 +4,12 @@ Run fs-uae with archived filesystem/adf files
 It will use compressed directories, and optionally replace source archive with
 the temporary one.
 """
+import os
+import shutil
 import sys
 
 from fs_uae_wrapper import base
+from fs_uae_wrapper import utils
 
 
 class Archive(base.Base):
@@ -41,6 +44,8 @@ class Archive(base.Base):
         if not self._extract():
             return False
 
+        self._load_save()
+
         if not self._copy_conf():
             return False
 
@@ -48,10 +53,10 @@ class Archive(base.Base):
         if kick_opts:
             self.fsuae_options.update(kick_opts)
 
-        if self._run_emulator(self.fsuae_options.list()):
-            return self._make_archive()
+        if not self._run_emulator(self.fsuae_options.list()):
+            return False
 
-        return True
+        return self._make_archive()
 
     def _validate_options(self):
 
@@ -71,6 +76,29 @@ class Archive(base.Base):
         """
         Produce archive and save it back. Than remove old one.
         """
+        if self.all_options.get('wrapper_persist_data', '0') != '1':
+            return True
+
+        saves = self._get_saves_dir()
+        if saves:
+            if not self._save_save():
+                return False
+
+        curdir = os.path.abspath('.')
+        os.chdir(self.dir)
+
+        if saves:
+            shutil.rmtree(saves)
+        os.unlink('Config.fs-uae')
+
+        title = self._get_title()
+
+        arch = os.path.basename(self.arch_filepath)
+        if not utils.create_archive(arch, title):
+            return False
+
+        os.rename(arch, self.arch_filepath)
+        os.chdir(curdir)
         return True
 
 
