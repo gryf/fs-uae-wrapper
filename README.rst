@@ -126,6 +126,7 @@ Options used:
 
 * ``wrapper`` (required) with ``cd32`` as an value
 * ``wrapper_archive`` (required) path to the archive with CD32 iso/cue/wav
+* ``wrapper_archiver`` (required) archiver to use for storage save state
 * ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
   message during extracting files
 
@@ -181,7 +182,8 @@ Options used:
 
 * ``wrapper`` (required) with ``cd32`` as an value
 * ``wrapper_archive`` (required) path to the archive with assets (usually means
-  whole system directories, floppies or hd images)
+* ``wrapper_archiver`` (required) archiver to use for storage save state
+  whole system directories, floppies or hard disk images)
 * ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
   message during extracting files
 * ``wrapper_persist_data`` (optional) if set to "1", will compress (possibly

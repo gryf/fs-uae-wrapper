@@ -56,6 +56,10 @@ class Archive(base.Base):
         if not self._run_emulator(self.fsuae_options.list()):
             return False
 
+        if self._get_saves_dir():
+            if not self._save_save():
+                return False
+
         return self._make_archive()
 
     def _validate_options(self):
@@ -79,14 +83,10 @@ class Archive(base.Base):
         if self.all_options.get('wrapper_persist_data', '0') != '1':
             return True
 
-        saves = self._get_saves_dir()
-        if saves:
-            if not self._save_save():
-                return False
-
         curdir = os.path.abspath('.')
         os.chdir(self.dir)
 
+        saves = self._get_saves_dir()
         if saves:
             shutil.rmtree(saves)
         os.unlink('Config.fs-uae')
