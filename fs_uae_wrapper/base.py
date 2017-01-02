@@ -108,16 +108,10 @@ class Base(object):
     def _extract(self):
         """Extract archive to temp dir"""
 
-        item = ''
-        gui_msg = self.all_options.get('wrapper_gui_msg', '0')
-        if gui_msg == '1':
-            item = self.all_options.get('title')
-            if not item:
-                item = self.all_options['wrapper_archive']
-
+        title = self._get_title()
         curdir = os.path.abspath('.')
         os.chdir(self.dir)
-        result = utils.extract_archive(self.arch_filepath, item)
+        result = utils.extract_archive(self.arch_filepath, title)
         os.chdir(curdir)
         return result
 
@@ -128,6 +122,19 @@ class Base(object):
         utils.run_command(['fs-uae'] + fsuae_options)
         os.chdir(curdir)
         return True
+
+    def _get_title(self):
+        """
+        Return the title if found in configuration. As a fallback archive file
+        name will be used as title.
+        """
+        title = ''
+        gui_msg = self.all_options.get('wrapper_gui_msg', '0')
+        if gui_msg == '1':
+            title = self.all_options.get('title')
+            if not title:
+                title = self.all_options['wrapper_archive']
+        return title
 
     def _save_save(self):
         """
