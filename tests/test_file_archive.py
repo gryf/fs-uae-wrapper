@@ -40,6 +40,11 @@ class TestArchive(TestCase):
         self.assertIsNone(arch)
         file_archive.TarArchive.ARCH = 'tar'
 
+        with open('foobarbaz.tar.bz2', 'w') as fobj:
+            fobj.write('\n')
+        arch = file_archive.get_archiver('foobarbaz.tar.bz2')
+        self.assertIsInstance(arch, file_archive.TarBzip2Archive)
+
     @mock.patch('subprocess.call')
     def test_archive(self, call):
         arch = file_archive.Archive()

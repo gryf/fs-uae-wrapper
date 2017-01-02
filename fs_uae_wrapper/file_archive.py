@@ -4,6 +4,7 @@ File archive classes
 import os
 import subprocess
 import sys
+import re
 
 
 class Archive(object):
@@ -125,6 +126,11 @@ def get_archiver(arch_name):
     """Return right class for provided archive file name"""
 
     _, ext = os.path.splitext(arch_name)
+    re_tar = re.compile('.*([tT][aA][rR].[^.]+$)')
+    result = re_tar.match(arch_name)
+
+    if result:
+        ext = result.groups[0]
 
     archivers = {'.tar': TarArchive,
                  '.tgz': TarGzipArchive,
