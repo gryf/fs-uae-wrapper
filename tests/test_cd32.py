@@ -1,7 +1,3 @@
-import os
-import sys
-import shutil
-from tempfile import mkstemp, mkdtemp
 from unittest import TestCase
 
 try:
@@ -15,28 +11,6 @@ from fs_uae_wrapper import utils
 
 class TestCD32(TestCase):
 
-    def setUp(self):
-        fd, self.fname = mkstemp()
-        self.dirname = mkdtemp()
-        self.confdir = mkdtemp()
-        os.close(fd)
-        self._argv = sys.argv[:]
-        sys.argv = ['fs-uae-wrapper']
-        self.curdir = os.path.abspath(os.curdir)
-
-    def tearDown(self):
-        os.chdir(self.curdir)
-        try:
-            shutil.rmtree(self.dirname)
-        except OSError:
-            pass
-        try:
-            shutil.rmtree(self.confdir)
-        except OSError:
-            pass
-        os.unlink(self.fname)
-        sys.argv = self._argv[:]
-
     def test_validate_options(self):
 
         acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
@@ -48,13 +22,14 @@ class TestCD32(TestCase):
         acd32.all_options['wrapper_archive'] = 'fake.tgz'
         self.assertTrue(acd32._validate_options())
 
+    @mock.patch('tempfile.mkdtemp')
     @mock.patch('fs_uae_wrapper.base.Base._save_save')
     @mock.patch('fs_uae_wrapper.base.Base._run_emulator')
     @mock.patch('fs_uae_wrapper.base.Base._kickstart_option')
     @mock.patch('fs_uae_wrapper.base.Base._load_save')
     @mock.patch('fs_uae_wrapper.base.Base._copy_conf')
     @mock.patch('fs_uae_wrapper.base.Base._extract')
-    def test_run(self, extr, cconf, lsave, kick, runemul, ssave):
+    def test_run(self, extr, cconf, lsave, kick, runemul, ssave, *args):
 
         extr.return_value = False
         cconf.return_value = False
@@ -63,32 +38,29 @@ class TestCD32(TestCase):
         runemul.return_value = False
         ssave.return_value = False
 
-        try:
-            acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
-            self.assertFalse(acd32.run())
+        acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
+        self.assertFalse(acd32.run())
 
-            acd32.all_options = {'wrapper': 'cd32',
-                                 'wrapper_archive': 'fake.tgz'}
+        acd32.all_options = {'wrapper': 'cd32',
+                             'wrapper_archive': 'fake.tgz'}
 
-            self.assertFalse(acd32.run())
+        self.assertFalse(acd32.run())
 
-            extr.return_value = True
-            self.assertFalse(acd32.run())
+        extr.return_value = True
+        self.assertFalse(acd32.run())
 
-            cconf.return_value = True
-            self.assertFalse(acd32.run())
+        cconf.return_value = True
+        self.assertFalse(acd32.run())
 
-            lsave.return_value = True
-            self.assertTrue(acd32.run())
+        lsave.return_value = True
+        self.assertTrue(acd32.run())
 
-            kick.return_value = {'foo': 'bar'}
-            self.assertTrue(acd32.run())
-            self.assertDictEqual(acd32.fsuae_options, {'foo': 'bar'})
+        kick.return_value = {'foo': 'bar'}
+        self.assertTrue(acd32.run())
+        self.assertDictEqual(acd32.fsuae_options, {'foo': 'bar'})
 
-            runemul.return_value = True
-            self.assertFalse(acd32.run())
+        runemul.return_value = True
+        self.assertFalse(acd32.run())
 
-            ssave.return_value = True
-            self.assertTrue(acd32.run())
-        finally:
-            acd32.clean()
+        ssave.return_value = True
+        self.assertTrue(acd32.run())
