@@ -20,11 +20,13 @@ class Archive(object):
         self._compess = self.archiver
         self._decompess = self.archiver
 
-    def create(self, arch_name):
+    def create(self, arch_name, files=None):
         """
         Create archive. Return True on success, False otherwise.
         """
-        result = subprocess.call([self._compess] + self.ADD + [arch_name, '.'])
+        files = files if files else ['.']
+        result = subprocess.call([self._compess] + self.ADD + [arch_name]
+                                 + files)
         if result != 0:
             sys.stderr.write("Unable to create archive `%s'\n" % arch_name)
             return False
@@ -89,7 +91,7 @@ class LzxArchive(Archive):
     ARCH = 'unlzx'
 
     @classmethod
-    def create(self, arch_name):
+    def create(self, arch_name, files=None):
         sys.stderr.write('Cannot create LZX archive. Only extracting is'
                          'supported\n')
         return False
@@ -98,14 +100,15 @@ class LzxArchive(Archive):
 class RarArchive(Archive):
     ARCH = ['rar', 'unrar']
 
-    def create(self, arch_name):
+    def create(self, arch_name, files=None):
+        files = files if files else sorted(os.listdir('.'))
         if self.archiver == 'unrar':
             sys.stderr.write('Cannot create RAR archive. Only extracting is'
                              'supported by unrar.\n')
             return False
 
         result = subprocess.call([self._compess] + self.ADD + [arch_name] +
-                                 sorted(os.listdir('.')))
+                                 files)
         if result != 0:
             sys.stderr.write("Unable to create archive `%s'\n" % arch_name)
             return False

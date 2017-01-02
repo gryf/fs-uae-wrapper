@@ -97,7 +97,9 @@ class Base(object):
         else:
             self.arch_filepath = os.path.join(conf_abs_dir, arch)
         # set optional save_state
-        self.save_filename = os.path.join(conf_abs_dir, conf_base + '_save.7z')
+        arch_ext = utils.get_arch_ext(self.all_options['wrapper_archiver'])
+        self.save_filename = os.path.join(conf_abs_dir, conf_base + '_save' +
+                                          arch_ext)
 
     def _copy_conf(self):
         """copy provided configuration as Config.fs-uae"""
@@ -141,6 +143,7 @@ class Base(object):
         """
         Get the saves from emulator and store it where configuration is placed
         """
+        os.chdir(self.dir)
         save_path = self._get_saves_dir()
         if not save_path:
             return True
@@ -148,10 +151,14 @@ class Base(object):
         if os.path.exists(self.save_filename):
             os.unlink(self.save_filename)
 
-        if not utils.run_command(['7z', 'a', self.save_filename, save_path]):
+        curdir = os.path.abspath('.')
+
+        if not utils.create_archive(self.save_filename, '', [save_path]):
             sys.stderr.write('Error: archiving save state failed\n')
+            os.chdir(curdir)
             return False
 
+        os.chdir(curdir)
         return True
 
     def _load_save(self):
@@ -163,17 +170,18 @@ class Base(object):
 
         curdir = os.path.abspath('.')
         os.chdir(self.dir)
-        utils.run_command(['7z', 'x', self.save_filename])
+        utils.extract_archive(self.save_filename)
         os.chdir(curdir)
         return True
 
     def _get_saves_dir(self):
         """
-        Return full path to save state directory or None in cases:
+        Return path to save state directory or None in cases:
             - there is no save state dir set relative to config file
             - save state dir is set globally
             - save state dir is set relative to the config file
             - save state dir doesn't exists
+        Note, that returned path is relative not absolute
         """
         if not self.all_options.get('save_states_dir'):
             return None
@@ -188,7 +196,10 @@ class Base(object):
         if not os.path.exists(save_path) or not os.path.isdir(save_path):
             return None
 
-        return save_path
+        if save.endswith('/'):
+            save = save[:-1]
+
+        return save
 
     def _validate_options(self):
         """Validate mandatory options"""

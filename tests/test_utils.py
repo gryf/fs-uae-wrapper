@@ -83,13 +83,14 @@ class TestUtils(TestCase):
         which.return_value = None
 
         # No config
-        self.assertFalse(utils.operate_archive('non-existend.7z', 'foo', ''))
+        self.assertFalse(utils.operate_archive('non-existend.7z', 'foo', '',
+                                               None))
 
         # Archive type not known
         with open('unsupported-archive.ace', 'w') as fobj:
             fobj.write("\n")
         self.assertFalse(utils.operate_archive('unsupported-archive.ace',
-                                               'foo', ''))
+                                               'foo', '', None))
 
         # archive is known, but extraction will fail - we have an empty
         # archive and there is no guarantee, that 7z exists on system where
@@ -99,17 +100,17 @@ class TestUtils(TestCase):
         with open('supported-archive.7z', 'w') as fobj:
             fobj.write("\n")
         self.assertTrue(utils.operate_archive('supported-archive.7z',
-                                              'extract', ''))
+                                              'extract', '', None))
         extract.assert_called_once()
 
         extract.reset_mock()
         self.assertTrue(utils.operate_archive('supported-archive.7z',
-                                              'extract', ''))
+                                              'extract', '', None))
         extract.assert_called_once()
 
         os.unlink('supported-archive.7z')
         self.assertTrue(utils.operate_archive('supported-archive.7z',
-                                              'create', 'test'))
+                                              'create', 'test', ['foo']))
         create.assert_called_once()
         show.assert_called_once()
 

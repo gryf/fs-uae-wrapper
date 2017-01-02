@@ -143,14 +143,14 @@ class TestBase(TestCase):
         run.assert_called_once_with(['fs-uae'])
 
     @mock.patch('fs_uae_wrapper.base.Base._get_saves_dir')
-    @mock.patch('fs_uae_wrapper.utils.run_command')
-    def test_save_save(self, run, saves_dir):
+    @mock.patch('fs_uae_wrapper.utils.create_archive')
+    def test_save_save(self, carch, saves_dir):
 
         bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})
         bobj.dir = self.dirname
         bobj.save_filename = 'foobar_save.7z'
         saves_dir.bobj.save_filenamereturn_value = None
-        run.return_value = True
+        carch.return_value = True
 
         self.assertTrue(bobj._save_save())
 
@@ -164,16 +164,16 @@ class TestBase(TestCase):
         os.mkdir(os.path.join(self.dirname, 'fs-uae-save'))
         self.assertTrue(bobj._save_save())
 
-        run.return_value = False
+        carch.return_value = False
         self.assertFalse(bobj._save_save())
 
-    @mock.patch('fs_uae_wrapper.utils.run_command')
-    def test_load_save(self, run):
+    @mock.patch('fs_uae_wrapper.utils.extract_archive')
+    def test_load_save(self, earch):
 
         bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})
         bobj.dir = self.dirname
         bobj.save_filename = "foobar_save.7z"
-        run.return_value = 0
+        earch.return_value = 0
 
         # fail to load save is not fatal
         self.assertTrue(bobj._load_save())
@@ -183,11 +183,11 @@ class TestBase(TestCase):
             fobj.write('asd')
 
         self.assertTrue(bobj._load_save())
-        run.assert_called_once_with(['7z', 'x', bobj.save_filename])
+        earch.assert_called_once_with(bobj.save_filename)
 
         # failure in searching for archiver are also non fatal
-        run.reset_mock()
-        run.return_value = 1
+        earch.reset_mock()
+        earch.return_value = 1
         self.assertTrue(bobj._save_save())
 
     def test_get_saves_dir(self):

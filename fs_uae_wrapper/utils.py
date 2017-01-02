@@ -57,7 +57,7 @@ def get_config_options(conf):
             for key, val in parser.items(section)}
 
 
-def operate_archive(arch_name, operation, text):
+def operate_archive(arch_name, operation, text, params):
     """
     Create archive from contents of current directory
     """
@@ -77,31 +77,31 @@ def operate_archive(arch_name, operation, text):
         res = archiver.extract(arch_name)
 
     if operation == 'create':
-        res = archiver.create(arch_name)
+        res = archiver.create(arch_name, params)
 
     msg.close()
 
     return res
 
 
-def create_archive(arch_name, title=''):
+def create_archive(arch_name, title='', params=None):
     """
     Create archive from contents of current directory
     """
     msg = ''
     if title:
         msg = "Creating archive for `%s'. Please be patient" % title
-    return operate_archive(arch_name, 'create', msg)
+    return operate_archive(arch_name, 'create', msg, params)
 
 
-def extract_archive(arch_name, title=''):
+def extract_archive(arch_name, title='', params=None):
     """
     Extract provided archive to current directory
     """
     msg = ''
     if title:
         msg = "Extracting files for `%s'. Please be patient" % title
-    return operate_archive(arch_name, 'extract', msg)
+    return operate_archive(arch_name, 'extract', msg, params)
 
 
 def run_command(cmd):
