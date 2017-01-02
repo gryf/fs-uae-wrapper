@@ -21,16 +21,26 @@ class Archive(object):
         Create archive using self.archiver and parameters in self.ADD
         attribute
         """
-        return subprocess.call([self.archiver] + self.ADD +
-                               [arch_name, '.']) == 0
+        result = subprocess.call([self.archiver] + self.ADD + [arch_name, '.'])
+        if result != 0:
+            sys.stderr.write("Unable to create archive `%s'\n" % arch_name)
+            return False
+        return True
 
     def extract(self, arch_name):
         """
         Create archive using self.archiver and parameters in self.ADD
         attribute
         """
-        return subprocess.call([self.archiver] + self.EXTRACT +
-                               [arch_name]) == 0
+        if not os.path.exists(arch_name):
+            sys.stderr.write("Archive `%s' doesn't exists.\n" % arch_name)
+            return False
+
+        result = subprocess.call([self.archiver] + self.EXTRACT + [arch_name])
+        if result != 0:
+            sys.stderr.write("Unable to extract archive `%s'\n" % arch_name)
+            return False
+        return True
 
     def which(self):
         """
@@ -103,18 +113,18 @@ class RarArchive(Archive):
                              'supported by unrar.\n')
             return False
 
-        return subprocess.call([self.archiver] + self.ADD + [arch_name] +
-                               sorted(os.listdir('.'))) == 0
+        result = subprocess.call([self.archiver] + self.ADD + [arch_name] +
+                                 sorted(os.listdir('.')))
+        if result != 0:
+            sys.stderr.write("Unable to create archive `%s'\n" % arch_name)
+            return False
+        return True
 
 
-def get_archiver(filename):
-    """Return right class for provided archive filename"""
+def get_archiver(arch_name):
+    """Return right class for provided archive file name"""
 
-    if not os.path.exists(filename):
-        sys.stderr.write("Archive `%s' doesn't exists.\n" % filename)
-        return None
-
-    _, ext = os.path.splitext(filename)
+    _, ext = os.path.splitext(arch_name)
 
     archivers = {'.tar': TarArchive,
                  '.tgz': TarGzipArchive,
@@ -129,10 +139,13 @@ def get_archiver(filename):
 
     archiver = archivers.get(ext)
     if not archiver:
+        sys.stderr.write("Unable find archive type for `%s'\n" % arch_name)
         return None
 
     archobj = archiver()
     if archobj.archiver is None:
+        sys.stderr.write("Unable find executable for operating on files"
+                         " `*%s'\n" % ext)
         return None
 
     return archobj

@@ -1,7 +1,6 @@
 import os
-import sys
 import shutil
-from tempfile import mkstemp, mkdtemp
+from tempfile import mkdtemp
 from unittest import TestCase
 
 try:
@@ -10,7 +9,6 @@ except ImportError:
     import mock
 
 from fs_uae_wrapper import file_archive
-from fs_uae_wrapper import utils
 
 
 class TestArchive(TestCase):
@@ -28,10 +26,6 @@ class TestArchive(TestCase):
             pass
 
     def test_get_archiver(self):
-        arch = file_archive.get_archiver('foobarbaz.cab')
-        self.assertIsNone(arch)
-        with open('foobarbaz.cab', 'w') as fobj:
-            fobj.write('\n')
         arch = file_archive.get_archiver('foobarbaz.cab')
         self.assertIsNone(arch)
 
@@ -56,6 +50,8 @@ class TestArchive(TestCase):
 
         call.reset_mock()
         call.return_value = 1
+        with open('foo', 'w') as fobj:
+            fobj.write('\n')
         self.assertFalse(arch.extract('foo'))
         call.assert_called_once_with(['false', 'x', 'foo'])
 
@@ -78,6 +74,9 @@ class TestArchive(TestCase):
     @mock.patch('fs_uae_wrapper.file_archive.Archive.which')
     @mock.patch('subprocess.call')
     def test_tar(self, call, which):
+        with open('foo', 'w') as fobj:
+            fobj.write('\n')
+
         arch = file_archive.TarArchive()
         arch.archiver = 'tar'
         call.return_value = 0
@@ -129,6 +128,9 @@ class TestArchive(TestCase):
     @mock.patch('fs_uae_wrapper.file_archive.Archive.which')
     @mock.patch('subprocess.call')
     def test_lha(self, call, which):
+        with open('foo', 'w') as fobj:
+            fobj.write('\n')
+
         arch = file_archive.LhaArchive()
         arch.archiver = 'lha'
         call.return_value = 0
@@ -144,6 +146,9 @@ class TestArchive(TestCase):
     @mock.patch('fs_uae_wrapper.file_archive.Archive.which')
     @mock.patch('subprocess.call')
     def test_lzx(self, call, which):
+        with open('foo', 'w') as fobj:
+            fobj.write('\n')
+
         arch = file_archive.LzxArchive()
         arch.archiver = 'unlzx'
         call.return_value = 0
@@ -159,6 +164,9 @@ class TestArchive(TestCase):
     @mock.patch('fs_uae_wrapper.file_archive.Archive.which')
     @mock.patch('subprocess.call')
     def test_7zip(self, call, which):
+        with open('foo', 'w') as fobj:
+            fobj.write('\n')
+
         arch = file_archive.SevenZArchive()
         arch.archiver = '7z'
         call.return_value = 0
@@ -174,6 +182,9 @@ class TestArchive(TestCase):
     @mock.patch('fs_uae_wrapper.file_archive.Archive.which')
     @mock.patch('subprocess.call')
     def test_zip(self, call, which):
+        with open('foo', 'w') as fobj:
+            fobj.write('\n')
+
         arch = file_archive.ZipArchive()
         arch.archiver = '7z'
         call.return_value = 0
@@ -189,6 +200,7 @@ class TestArchive(TestCase):
     @mock.patch('fs_uae_wrapper.file_archive.Archive.which')
     @mock.patch('subprocess.call')
     def test_rar(self, call, which):
+
         arch = file_archive.RarArchive()
         arch.archiver = 'rar'
         call.return_value = 0
@@ -206,6 +218,8 @@ class TestArchive(TestCase):
         self.assertTrue(arch.create('foo.rar'))
         call.assert_called_once_with(['rar', 'a', 'foo.rar', 'bar', 'baz',
                                       'directory', 'foo'])
+        with open('foo', 'w') as fobj:
+            fobj.write('\n')
 
         call.reset_mock()
         call.return_value = 1
