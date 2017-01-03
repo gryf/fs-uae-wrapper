@@ -47,6 +47,8 @@ class Base(object):
 
         self.dir = tempfile.mkdtemp()
 
+        self._set_assets_paths()
+
         return True
 
     def clean(self):
@@ -91,15 +93,17 @@ class Base(object):
         conf_base = os.path.basename(self.conf_file)
         conf_base = os.path.splitext(conf_base)[0]
 
-        arch = self.all_options['wrapper_archive']
-        if os.path.isabs(arch):
-            self.arch_filepath = arch
-        else:
-            self.arch_filepath = os.path.join(conf_abs_dir, arch)
+        arch = self.all_options.get('wrapper_archive')
+        if arch:
+            if os.path.isabs(arch):
+                self.arch_filepath = arch
+            else:
+                self.arch_filepath = os.path.join(conf_abs_dir, arch)
         # set optional save_state
-        arch_ext = utils.get_arch_ext(self.all_options['wrapper_archiver'])
-        self.save_filename = os.path.join(conf_abs_dir, conf_base + '_save' +
-                                          arch_ext)
+        arch_ext = utils.get_arch_ext(self.all_options.get('wrapper_archiver'))
+        if arch_ext:
+            self.save_filename = os.path.join(conf_abs_dir, conf_base +
+                                              '_save' + arch_ext)
 
     def _copy_conf(self):
         """copy provided configuration as Config.fs-uae"""

@@ -146,16 +146,18 @@ class TestBase(TestCase):
     @mock.patch('fs_uae_wrapper.utils.create_archive')
     def test_save_save(self, carch, saves_dir):
 
-        bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})
+        os.chdir(self.confdir)
+
+        bobj = base.Base('myconf.fs-uae', utils.CmdOption(), {})
         bobj.dir = self.dirname
-        bobj.save_filename = 'foobar_save.7z'
-        saves_dir.bobj.save_filenamereturn_value = None
+        bobj.save_filename = os.path.join(self.confdir, 'myconf_save.7z')
+
+        saves_dir.return_value = None
         carch.return_value = True
 
         self.assertTrue(bobj._save_save())
 
         saves_dir.return_value = bobj.save_filename
-        os.chdir(self.confdir)
         with open(bobj.save_filename, 'w') as fobj:
             fobj.write('asd')
 
@@ -216,6 +218,9 @@ class TestBase(TestCase):
 
         os.unlink(path)
         os.mkdir(path)
+        self.assertEqual(bobj._get_saves_dir(), 'saves')
+
+        bobj.all_options['save_states_dir'] = '$CONFIG/saves/'
         self.assertEqual(bobj._get_saves_dir(), 'saves')
 
     @mock.patch('fs_uae_wrapper.path.which')

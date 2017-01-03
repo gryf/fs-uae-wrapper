@@ -34,7 +34,6 @@ class CD32(base.Base):
         if not self._validate_options():
             return False
 
-        self._set_assets_paths()
         if not self._extract():
             return False
 

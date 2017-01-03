@@ -40,7 +40,6 @@ class Archive(base.Base):
         if not super(Archive, self).run():
             return False
 
-        self._set_assets_paths()
         if not self._extract():
             return False
 
