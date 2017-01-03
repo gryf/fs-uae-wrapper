@@ -139,6 +139,7 @@ Let's see some sample config for a game, which is saved as
    [config]
    wrapper = cd32
    wrapper_archive = ChaosEngine.7z
+   wrapper_archiver = 7z
    wrapper_gui_msg = 1
 
    amiga_model = CD32
@@ -197,6 +198,7 @@ Example configuration:
    [config]
    wrapper = archive
    wrapper_archive = Workbench_3.1.tar.bz2
+   wrapper_archiver = lha
    wrapper_gui_msg = 1
    wrapper_persist_data = 1
 

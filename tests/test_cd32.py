@@ -11,7 +11,10 @@ from fs_uae_wrapper import utils
 
 class TestCD32(TestCase):
 
-    def test_validate_options(self):
+    @mock.patch('fs_uae_wrapper.path.which')
+    def test_validate_options(self, which):
+
+        which.return_value = None
 
         acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(acd32._validate_options())
@@ -23,16 +26,22 @@ class TestCD32(TestCase):
         self.assertFalse(acd32._validate_options())
 
         acd32.all_options['wrapper_archiver'] = 'rar'
+        self.assertFalse(acd32._validate_options())
+
+        which.return_value = 'unrar'
+        acd32.all_options['wrapper_archiver'] = 'rar'
         self.assertTrue(acd32._validate_options())
 
     @mock.patch('tempfile.mkdtemp')
+    @mock.patch('fs_uae_wrapper.path.which')
     @mock.patch('fs_uae_wrapper.base.Base._save_save')
     @mock.patch('fs_uae_wrapper.base.Base._run_emulator')
     @mock.patch('fs_uae_wrapper.base.Base._kickstart_option')
     @mock.patch('fs_uae_wrapper.base.Base._load_save')
     @mock.patch('fs_uae_wrapper.base.Base._copy_conf')
     @mock.patch('fs_uae_wrapper.base.Base._extract')
-    def test_run(self, extr, cconf, lsave, kick, runemul, ssave, mkdtemp):
+    def test_run(self, extr, cconf, lsave, kick, runemul, ssave, which,
+                 mkdtemp):
 
         extr.return_value = False
         cconf.return_value = False
@@ -40,6 +49,7 @@ class TestCD32(TestCase):
         kick.return_value = {}
         runemul.return_value = False
         ssave.return_value = False
+        which.return_value = 'unrar'
 
         acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(acd32.run())

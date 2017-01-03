@@ -97,7 +97,7 @@ class Archive(base.Base):
         if not utils.create_archive(arch, title):
             return False
 
-        os.rename(arch, self.arch_filepath)
+        shutil.move(arch, self.arch_filepath)
         os.chdir(curdir)
         return True
 

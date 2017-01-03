@@ -26,7 +26,9 @@ class TestArchive(TestCase):
         except OSError:
             pass
 
-    def test_validate_options(self):
+    @mock.patch('fs_uae_wrapper.path.which')
+    def test_validate_options(self, which):
+        which.return_value = None
 
         arch = archive.Archive('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(arch._validate_options())
@@ -38,16 +40,21 @@ class TestArchive(TestCase):
         self.assertFalse(arch._validate_options())
 
         arch.all_options['wrapper_archiver'] = 'rar'
+        self.assertFalse(arch._validate_options())
+
+        which.return_value = 'unrar'
+        arch.all_options['wrapper_archiver'] = 'rar'
         self.assertTrue(arch._validate_options())
 
     @mock.patch('tempfile.mkdtemp')
+    @mock.patch('fs_uae_wrapper.path.which')
     @mock.patch('fs_uae_wrapper.archive.Archive._make_archive')
     @mock.patch('fs_uae_wrapper.base.Base._run_emulator')
     @mock.patch('fs_uae_wrapper.base.Base._kickstart_option')
     @mock.patch('fs_uae_wrapper.base.Base._copy_conf')
     @mock.patch('fs_uae_wrapper.base.Base._load_save')
     @mock.patch('fs_uae_wrapper.base.Base._extract')
-    def test_run(self, extr, load, copy, kick, run, march, mkdtemp):
+    def test_run(self, extr, load, copy, kick, run, march, which, mkdtemp):
 
         extr.return_value = False
         load.return_value = False
@@ -55,6 +62,7 @@ class TestArchive(TestCase):
         kick.return_value = False
         run.return_value = False
         march.return_value = False
+        which.return_value = 'rar'
 
         arch = archive.Archive('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(arch.run())

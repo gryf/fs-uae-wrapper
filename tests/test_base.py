@@ -240,7 +240,10 @@ class TestBase(TestCase):
                             'wrapper_archiver': '7z'}
         self.assertTrue(bobj._validate_options())
 
-    def test_run_clean(self):
+    @mock.patch('fs_uae_wrapper.path.which')
+    def test_run_clean(self, which):
+
+        which.return_value = 'rar'
 
         bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})
         bobj.all_options = {}
