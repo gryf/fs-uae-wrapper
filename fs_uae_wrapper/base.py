@@ -147,6 +147,9 @@ class Base(object):
         """
         Get the saves from emulator and store it where configuration is placed
         """
+        if self.all_options.get('wrapper_save_state', '0') != '1':
+            return True
+
         os.chdir(self.dir)
         save_path = self._get_saves_dir()
         if not save_path:
@@ -169,6 +172,9 @@ class Base(object):
         """
         Put the saves (if exists) to the temp directory.
         """
+        if self.all_options.get('wrapper_save_state', '0') != '1':
+            return True
+
         if not os.path.exists(self.save_filename):
             return True
 
@@ -211,6 +217,9 @@ class Base(object):
             sys.stderr.write("Configuration lacks of required "
                              "`wrapper' option.\n")
             return False
+
+        if self.all_options.get('wrapper_save_state', '0') == '0':
+            return True
 
         if 'wrapper_archiver' not in self.all_options:
             sys.stderr.write("Configuration lacks of required "

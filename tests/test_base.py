@@ -155,13 +155,17 @@ class TestBase(TestCase):
         saves_dir.return_value = None
         carch.return_value = True
 
-        self.assertTrue(bobj._save_save())
+        self.assertTrue(bobj._save_save(),
+                        'there is assumption, that wrapper_save_state is'
+                        ' false by default. Here it was true.')
+
+        bobj.all_options['wrapper_save_state'] = '1'
+        self.assertTrue(bobj._save_save(),
+                        'unexpected save_state directory found')
 
         saves_dir.return_value = bobj.save_filename
         with open(bobj.save_filename, 'w') as fobj:
             fobj.write('asd')
-
-        self.assertTrue(bobj._save_save())
 
         os.mkdir(os.path.join(self.dirname, 'fs-uae-save'))
         self.assertTrue(bobj._save_save())
@@ -176,6 +180,12 @@ class TestBase(TestCase):
         bobj.dir = self.dirname
         bobj.save_filename = "foobar_save.7z"
         earch.return_value = 0
+
+        # By default there would be no save state persistence
+        self.assertTrue(bobj._load_save())
+
+        # set wrapper_save_state option, so we can proceed with test
+        bobj.all_options['wrapper_save_state'] = '1'
 
         # fail to load save is not fatal
         self.assertTrue(bobj._load_save())
@@ -234,14 +244,24 @@ class TestBase(TestCase):
         self.assertFalse(bobj._validate_options())
 
         bobj.all_options = {'wrapper': 'dummy'}
-        self.assertFalse(bobj._validate_options())
+        self.assertTrue(bobj._validate_options())
 
         bobj.all_options = {'wrapper': 'dummy',
+                            'wrapper_archiver': 'myarchiver'}
+        self.assertTrue(bobj._validate_options())
+
+        bobj.all_options = {'wrapper': 'dummy',
+                            'wrapper_save_state': '1',
                             'wrapper_archiver': 'myarchiver'}
         self.assertFalse(bobj._validate_options())
 
         which.return_value = '7z'
         bobj.all_options = {'wrapper': 'dummy',
+                            'wrapper_save_state': '1'}
+        self.assertFalse(bobj._validate_options())
+
+        bobj.all_options = {'wrapper': 'dummy',
+                            'wrapper_save_state': '1',
                             'wrapper_archiver': '7z'}
         self.assertTrue(bobj._validate_options())
 

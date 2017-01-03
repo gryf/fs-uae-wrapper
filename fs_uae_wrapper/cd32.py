@@ -45,7 +45,10 @@ class CD32(base.Base):
         if kick_opts:
             self.fsuae_options.update(kick_opts)
 
-        if self._run_emulator(self.fsuae_options.list()):
+        if not self._run_emulator(self.fsuae_options.list()):
+            return False
+
+        if self._get_saves_dir():
             return self._save_save()
 
         return True

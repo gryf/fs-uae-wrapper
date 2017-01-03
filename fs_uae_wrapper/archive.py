@@ -65,9 +65,6 @@ class Archive(base.Base):
 
         validation_result = super(Archive, self)._validate_options()
 
-        if not super(Archive, self)._validate_options():
-            validation_result = False
-
         if 'wrapper_archive' not in self.all_options:
             sys.stderr.write("Configuration lacks of required "
                              "`wrapper_archive' option.\n")

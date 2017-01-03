@@ -28,40 +28,40 @@ class TestArchive(TestCase):
 
     @mock.patch('fs_uae_wrapper.path.which')
     def test_validate_options(self, which):
-        which.return_value = None
+        which.return_value = 'unrar'
 
         arch = archive.Archive('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(arch._validate_options())
+        arch.all_options = {'wrapper': 'archive'}
 
         arch.all_options['wrapper'] = 'archive'
         self.assertFalse(arch._validate_options())
 
-        arch.all_options['wrapper_archive'] = 'fake.tgz'
-        self.assertFalse(arch._validate_options())
-
-        arch.all_options['wrapper_archiver'] = 'rar'
-        self.assertFalse(arch._validate_options())
-
-        which.return_value = 'unrar'
-        arch.all_options['wrapper_archiver'] = 'rar'
+        arch.all_options['wrapper_archive'] = 'rar'
         self.assertTrue(arch._validate_options())
 
     @mock.patch('tempfile.mkdtemp')
     @mock.patch('fs_uae_wrapper.path.which')
     @mock.patch('fs_uae_wrapper.archive.Archive._make_archive')
+    @mock.patch('fs_uae_wrapper.base.Base._save_save')
+    @mock.patch('fs_uae_wrapper.base.Base._get_saves_dir')
     @mock.patch('fs_uae_wrapper.base.Base._run_emulator')
     @mock.patch('fs_uae_wrapper.base.Base._kickstart_option')
     @mock.patch('fs_uae_wrapper.base.Base._copy_conf')
     @mock.patch('fs_uae_wrapper.base.Base._load_save')
     @mock.patch('fs_uae_wrapper.base.Base._extract')
-    def test_run(self, extr, load, copy, kick, run, march, which, mkdtemp):
+    def test_run(self, extract, load_save, copy_conf, kick_option,
+                 run_emulator, get_save_dir, save_state, make_arch, which,
+                 mkdtemp):
 
-        extr.return_value = False
-        load.return_value = False
-        copy.return_value = False
-        kick.return_value = False
-        run.return_value = False
-        march.return_value = False
+        extract.return_value = False
+        load_save.return_value = False
+        copy_conf.return_value = False
+        kick_option.return_value = False
+        run_emulator.return_value = False
+        get_save_dir.return_value = False
+        save_state.return_value = False
+        make_arch.return_value = False
         which.return_value = 'rar'
 
         arch = archive.Archive('Config.fs-uae', utils.CmdOption(), {})
@@ -73,23 +73,29 @@ class TestArchive(TestCase):
 
         self.assertFalse(arch.run())
 
-        extr.return_value = True
+        extract.return_value = True
         self.assertFalse(arch.run())
 
-        load.return_value = True
+        load_save.return_value = True
         self.assertFalse(arch.run())
 
-        copy.return_value = True
+        copy_conf.return_value = True
         self.assertFalse(arch.run())
 
-        kick.return_value = {'foo': 'bar'}
+        kick_option.return_value = {'foo': 'bar'}
         self.assertFalse(arch.run())
         self.assertDictEqual(arch.fsuae_options, {'foo': 'bar'})
 
-        run.return_value = True
+        run_emulator.return_value = True
         self.assertFalse(arch.run())
 
-        march.return_value = True
+        get_save_dir.return_value = True
+        self.assertFalse(arch.run())
+
+        save_state.return_value = True
+        self.assertFalse(arch.run())
+
+        make_arch.return_value = True
         self.assertTrue(arch.run())
 
     @mock.patch('os.rename')

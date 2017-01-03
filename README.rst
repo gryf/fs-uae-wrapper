@@ -126,9 +126,14 @@ Options used:
 
 * ``wrapper`` (required) with ``cd32`` as an value
 * ``wrapper_archive`` (required) path to the archive with CD32 iso/cue/wav
-* ``wrapper_archiver`` (required) archiver to use for storage save state
+* ``wrapper_archiver`` (conditionally required) archiver to use for storage
+  save state
 * ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
   message during extracting files
+* ``wrapper_save_state`` (optional) if set to "1", will load/archive save state
+  directory, defined as ``$CONFIG/[save-state-dir-name]`` using provided
+  ``wrapper_archiver`` archiver. If this option is enabled,
+  ``wrapper_archiver`` will be required.
 
 Let's see some sample config for a game, which is saved as
 ``ChaosEngine.fs-uae``:
@@ -166,14 +171,15 @@ Now, there several thing will happen:
 - Archive with game assists will be extracted in that directory
 - Configuration file will be copied into that directory, and renamed to
   ``Config.fs-uae``
-- If there is saved state, it also would be extracted there
+- If ``wrapper_save_state`` is set, and there is saved state archive, it also
+  would be extracted there
 - ``fs-uae`` will be launched inside that directory
 
 Next, after ``fs-uae`` quit, there will:
 
-- Create archive containing save state with name like the configuration file
-  with additional ``_save`` suffix. In this example it would be
-  ``ChaosEngine_save.7z``.
+- Optionally create archive containing save state with name like the
+  configuration file with additional ``_save`` suffix. In this example it would
+  be ``ChaosEngine_save.7z``.
 - Wipe out temporary directory
 
 archive
@@ -181,14 +187,19 @@ archive
 
 Options used:
 
-* ``wrapper`` (required) with ``cd32`` as an value
+* ``wrapper`` (required) with ``archive`` as an value
 * ``wrapper_archive`` (required) path to the archive with assets (usually means
-* ``wrapper_archiver`` (required) archiver to use for storage save state
   whole system directories, floppies or hard disk images)
+* ``wrapper_archiver`` (conditionally required) archiver to use for storage
+  save state
 * ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
   message during extracting files
 * ``wrapper_persist_data`` (optional) if set to "1", will compress (possibly
   changed) data, replacing original archive
+* ``wrapper_save_state`` (optional) if set to "1", will archive save state
+  directory, defined as ``$CONFIG/[save-state-dir-name]`` using provided
+  ``wrapper_archiver`` archiver. If this option is enabled,
+  ``wrapper_archiver`` will be required.
 
 Example configuration:
 
@@ -201,7 +212,7 @@ Example configuration:
    wrapper_archiver = lha
    wrapper_gui_msg = 1
    wrapper_persist_data = 1
-
+   wrapper_save_state = 1
    ...
 
 And execution is as usual:
@@ -214,11 +225,12 @@ This module will do several steps (similar as with ``cd32`` wrapper):
 
 - create temporary directory
 - extract provided in configuration archive
-- extract save state (if exists)
+- extract save state (if ``wrapper_save_state`` is set to ``1`` and archive
+  with save exists)
 - copy configuration under name ``Config.fs-uae``
 - run the fs-uae emulator
-- create archive with save state (if save state directory place is *not* a
-  global one)
+- optionally create archive with save state (if save state directory place is
+  *not* a global one)
 - optionally create new archive under the same name as the original one and
   replace it with original one.
 
