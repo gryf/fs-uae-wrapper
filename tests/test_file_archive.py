@@ -60,61 +60,73 @@ class TestArchive(TestCase):
         self.assertFalse(arch.extract('foo'))
         call.assert_called_once_with(['false', 'x', 'foo'])
 
+    @mock.patch('os.path.exists')
     @mock.patch('fs_uae_wrapper.path.which')
     @mock.patch('subprocess.call')
-    def test_tar(self, call, which):
+    def test_tar(self, call, which, exists):
         with open('foo', 'w') as fobj:
             fobj.write('\n')
 
         which.return_value = 'tar'
+        exists.return_value = True
 
         arch = file_archive.TarArchive()
         arch.archiver = 'tar'
         call.return_value = 0
 
-        self.assertTrue(arch.create('foo'))
-        call.assert_called_once_with(['tar', 'cf', 'foo', '.'])
+        self.assertTrue(arch.create('foo.tar'))
+        call.assert_called_once_with(['tar', 'cf', 'foo.tar', 'foo'])
 
         call.reset_mock()
         call.return_value = 1
-        self.assertFalse(arch.extract('foo'))
-        call.assert_called_once_with(['tar', 'xf', 'foo'])
+        self.assertFalse(arch.extract('foo.tar'))
+        call.assert_called_once_with(['tar', 'xf', 'foo.tar'])
 
         call.reset_mock()
         arch = file_archive.TarGzipArchive()
         arch.archiver = 'tar'
         call.return_value = 0
-        self.assertTrue(arch.create('foo'))
-        call.assert_called_once_with(['tar', 'zcf', 'foo', '.'])
+        self.assertTrue(arch.create('foo.tgz'))
+        call.assert_called_once_with(['tar', 'zcf', 'foo.tgz', 'foo'])
 
         call.reset_mock()
         call.return_value = 1
-        self.assertFalse(arch.extract('foo'))
-        call.assert_called_once_with(['tar', 'xf', 'foo'])
+        self.assertFalse(arch.extract('foo.tgz'))
+        call.assert_called_once_with(['tar', 'xf', 'foo.tgz'])
 
         call.reset_mock()
         arch = file_archive.TarBzip2Archive()
         arch.archiver = 'tar'
         call.return_value = 0
-        self.assertTrue(arch.create('foo'))
-        call.assert_called_once_with(['tar', 'jcf', 'foo', '.'])
+        self.assertTrue(arch.create('foo.tar.bz2'))
+        call.assert_called_once_with(['tar', 'jcf', 'foo.tar.bz2', 'foo'])
 
         call.reset_mock()
         call.return_value = 1
-        self.assertFalse(arch.extract('foo'))
-        call.assert_called_once_with(['tar', 'xf', 'foo'])
+        self.assertFalse(arch.extract('foo.tar.bz2'))
+        call.assert_called_once_with(['tar', 'xf', 'foo.tar.bz2'])
 
         call.reset_mock()
         arch = file_archive.TarXzArchive()
         arch.archiver = 'tar'
         call.return_value = 0
-        self.assertTrue(arch.create('foo'))
-        call.assert_called_once_with(['tar', 'Jcf', 'foo', '.'])
+        self.assertTrue(arch.create('foo.tar.xz'))
+        call.assert_called_once_with(['tar', 'Jcf', 'foo.tar.xz', 'foo'])
 
         call.reset_mock()
         call.return_value = 1
-        self.assertFalse(arch.extract('foo'))
-        call.assert_called_once_with(['tar', 'xf', 'foo'])
+        self.assertFalse(arch.extract('foo.tar.xz'))
+        call.assert_called_once_with(['tar', 'xf', 'foo.tar.xz'])
+
+        with open('bar', 'w') as fobj:
+            fobj.write('\n')
+
+        call.reset_mock()
+        arch = file_archive.TarGzipArchive()
+        arch.archiver = 'tar'
+        call.return_value = 0
+        self.assertTrue(arch.create('foo.tgz'))
+        call.assert_called_once_with(['tar', 'zcf', 'foo.tgz', 'bar', 'foo'])
 
     @mock.patch('fs_uae_wrapper.path.which')
     @mock.patch('subprocess.call')

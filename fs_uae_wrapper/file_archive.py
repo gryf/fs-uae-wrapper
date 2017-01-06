@@ -53,6 +53,15 @@ class TarArchive(Archive):
     EXTRACT = ['xf']
     ARCH = 'tar'
 
+    def create(self, arch_name, files=None):
+        files = files if files else sorted(os.listdir('.'))
+        result = subprocess.call([self._compess] + self.ADD + [arch_name] +
+                                 files)
+        if result != 0:
+            sys.stderr.write("Unable to create archive `%s'\n" % arch_name)
+            return False
+        return True
+
 
 class TarGzipArchive(TarArchive):
     ADD = ['zcf']

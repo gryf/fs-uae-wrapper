@@ -7,7 +7,7 @@ from distutils.core import setup
 
 setup(name='fs-uae-wrapper',
       packages=['fs_uae_wrapper'],
-      version='0.5',
+      version='0.6',
       description='Automate archives and state for fs-uae',
       author='Roman Dobosz',
       author_email='gryf73@gmail.com',
