@@ -47,7 +47,7 @@ class TestArchive(TestCase):
         arch = savestate.SaveState('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(arch.run())
 
-        arch.all_options = {'wrapper': 'archive',
+        arch.all_options = {'wrapper': 'savestate',
                             'wrapper_save_state': '1',
                             'wrapper_archiver': 'rar'}
 
@@ -70,3 +70,16 @@ class TestArchive(TestCase):
 
         save_state.return_value = True
         self.assertTrue(arch.run())
+
+    @mock.patch('fs_uae_wrapper.path.which')
+    def test_validate_options(self, which):
+        which.return_value = 'unrar'
+
+        arch = savestate.SaveState('Config.fs-uae', utils.CmdOption(), {})
+        self.assertFalse(arch._validate_options())
+
+        arch.all_options['wrapper'] = 'savestate'
+        self.assertFalse(arch._validate_options())
+
+        arch.all_options['wrapper_archiver'] = 'rar'
+        self.assertTrue(arch._validate_options())

@@ -245,19 +245,16 @@ savestate
 Options used:
 
 * ``wrapper`` (required) with ``archive`` as an value
-* ``wrapper_archiver`` (conditionally required) archiver to use for storage
-  save state
+* ``wrapper_archiver`` (required) archiver to use for storage save state
 * ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
   message during extracting files
-* ``wrapper_save_state`` (optional) if set to "1", will archive save state
-  directory, defined as ``$CONFIG/[save-state-dir-name]`` using provided
-  ``wrapper_archiver`` archiver. If this option is enabled,
-  ``wrapper_archiver`` will be required.
 
 This module is primarily used to run emulator with read only media attached
 (like images of floppies or uncompressed CD-ROMs) and its purpose is to
 preserve save state which will be created as an archive alongside with original
-configuration file in selected archive format.
+configuration file in selected archive format. Note, that there is required to
+provide ``wrapper_archiver``, since option ``wrapper_save_state`` is implicitly
+set to value ``1`` in this module.
 
 Example configuration:
 
@@ -268,7 +265,6 @@ Example configuration:
    wrapper = savestate
    wrapper_archiver = 7z
    wrapper_gui_msg = 1
-   wrapper_save_state = 1
    ...
 
 And execution is as usual:
