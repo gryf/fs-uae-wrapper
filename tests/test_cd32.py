@@ -30,7 +30,7 @@ class TestCD32(TestCase):
         save_state.return_value = False
         which.return_value = 'unrar'
 
-        acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
+        acd32 = cd32.Wrapper('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(acd32.run())
 
         acd32.all_options = {'wrapper': 'cd32',

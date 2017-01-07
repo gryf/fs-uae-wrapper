@@ -30,7 +30,7 @@ class TestArchive(TestCase):
     def test_validate_options(self, which):
         which.return_value = 'unrar'
 
-        arch = archive.Archive('Config.fs-uae', utils.CmdOption(), {})
+        arch = archive.Wrapper('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(arch._validate_options())
         arch.all_options = {'wrapper': 'archive'}
 
@@ -42,7 +42,7 @@ class TestArchive(TestCase):
 
     @mock.patch('tempfile.mkdtemp')
     @mock.patch('fs_uae_wrapper.path.which')
-    @mock.patch('fs_uae_wrapper.archive.Archive._make_archive')
+    @mock.patch('fs_uae_wrapper.archive.Wrapper._make_archive')
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._save_save')
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._get_saves_dir')
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._run_emulator')
@@ -61,7 +61,7 @@ class TestArchive(TestCase):
         make_arch.return_value = False
         which.return_value = 'rar'
 
-        arch = archive.Archive('Config.fs-uae', utils.CmdOption(), {})
+        arch = archive.Wrapper('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(arch.run())
 
         arch.all_options = {'wrapper': 'archive',
@@ -103,7 +103,7 @@ class TestArchive(TestCase):
         title.return_value = ''
         carch.return_value = False
 
-        arch = archive.Archive('Config.fs-uae', utils.CmdOption(), {})
+        arch = archive.Wrapper('Config.fs-uae', utils.CmdOption(), {})
         arch.dir = self.dirname
         arch.arch_filepath = os.path.join(self.dirname, 'foo.tgz')
         arch.all_options = {}

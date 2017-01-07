@@ -4,7 +4,7 @@ Wrapper module with preserved save state in archive file.
 from fs_uae_wrapper import base
 
 
-class SaveState(base.Base):
+class Wrapper(base.Base):
     """
     Preserve save state.
     """
@@ -16,8 +16,7 @@ class SaveState(base.Base):
                             parameters
             configuration:  is config dictionary created out of config file
         """
-        super(SaveState, self).__init__(conf_file, fsuae_options,
-                                        configuration)
+        super(Wrapper, self).__init__(conf_file, fsuae_options, configuration)
         self.arch_filepath = None
         self.all_options['wrapper_save_state'] = '1'
 
@@ -31,7 +30,7 @@ class SaveState(base.Base):
             - run the emulation
             - optionally make archive save state
         """
-        if not super(SaveState, self).run():
+        if not super(Wrapper, self).run():
             return False
 
         self._load_save()
@@ -52,7 +51,7 @@ class SaveState(base.Base):
 def run(config_file, fsuae_options, configuration):
     """Run fs-uae with provided config file and options"""
 
-    runner = SaveState(config_file, fsuae_options, configuration)
+    runner = Wrapper(config_file, fsuae_options, configuration)
     try:
         return runner.run()
     finally:

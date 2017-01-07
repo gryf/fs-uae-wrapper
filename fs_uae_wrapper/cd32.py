@@ -11,7 +11,7 @@ name.
 from fs_uae_wrapper import base
 
 
-class CD32(base.ArchiveBase):
+class Wrapper(base.ArchiveBase):
     """
     Class for performing extracting archive, copying emulator files, and
     cleaning it back again
@@ -28,7 +28,7 @@ class CD32(base.ArchiveBase):
             - run the emulation
             - archive save state
         """
-        super(CD32, self).run()
+        super(Wrapper, self).run()
         if not self._validate_options():
             return False
 
@@ -51,7 +51,7 @@ class CD32(base.ArchiveBase):
 def run(config_file, fsuae_options, configuration):
     """Run fs-uae with provided config file and options"""
 
-    runner = CD32(config_file, fsuae_options, configuration)
+    runner = Wrapper(config_file, fsuae_options, configuration)
     try:
         return runner.run()
     finally:

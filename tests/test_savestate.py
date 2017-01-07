@@ -42,7 +42,7 @@ class TestSaveState(TestCase):
         save_state.return_value = False
         which.return_value = 'rar'
 
-        arch = savestate.SaveState('Config.fs-uae', utils.CmdOption(), {})
+        arch = savestate.Wrapper('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(arch.run())
 
         arch.all_options = {'wrapper': 'savestate',
@@ -69,7 +69,7 @@ class TestSaveState(TestCase):
     def test_validate_options(self, which):
         which.return_value = 'unrar'
 
-        arch = savestate.SaveState('Config.fs-uae', utils.CmdOption(), {})
+        arch = savestate.Wrapper('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(arch._validate_options())
 
         arch.all_options['wrapper'] = 'savestate'

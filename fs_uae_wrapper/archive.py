@@ -11,13 +11,13 @@ from fs_uae_wrapper import base
 from fs_uae_wrapper import utils
 
 
-class Archive(base.ArchiveBase):
+class Wrapper(base.ArchiveBase):
     """
     Class for performing extracting archive, copying emulator files, and
     cleaning it back again
     """
     def __init__(self, conf_file, fsuae_options, configuration):
-        super(Archive, self).__init__(conf_file, fsuae_options, configuration)
+        super(Wrapper, self).__init__(conf_file, fsuae_options, configuration)
         self.archive_type = None
 
     def run(self):
@@ -29,7 +29,7 @@ class Archive(base.ArchiveBase):
             - run the emulation
             - optionally make archive save state
         """
-        if not super(Archive, self).run():
+        if not super(Wrapper, self).run():
             return False
 
         if not self._extract():
@@ -78,7 +78,7 @@ class Archive(base.ArchiveBase):
 def run(config_file, fsuae_options, configuration):
     """Run fs-uae with provided config file and options"""
 
-    runner = Archive(config_file, fsuae_options, configuration)
+    runner = Wrapper(config_file, fsuae_options, configuration)
     try:
         return runner.run()
     finally:
