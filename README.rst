@@ -106,6 +106,7 @@ Currently, three wrapper modules are available:
 - plain
 - cd32
 - archive
+- savestate
 
 plain
 -----
@@ -139,7 +140,6 @@ Let's see some sample config for a game, which is saved as
 ``ChaosEngine.fs-uae``:
 
 .. code:: ini
-   :number-lines:
 
    [config]
    wrapper = cd32
@@ -165,8 +165,7 @@ Next, the invocation of the wrapper would be as follows:
 
 Now, there several thing will happen:
 
-- Config file will be read, and wrapper module will be find (because we already
-  put it on line 2)
+- Config file will be read, and wrapper module will be found
 - New temporary directory will be created
 - Archive with game assists will be extracted in that directory
 - Configuration file will be copied into that directory, and renamed to
@@ -204,7 +203,6 @@ Options used:
 Example configuration:
 
 .. code:: ini
-   :number-lines:
 
    [config]
    wrapper = archive
@@ -214,6 +212,13 @@ Example configuration:
    wrapper_persist_data = 1
    wrapper_save_state = 1
    ...
+
+This module is quite useful in two use cases. First is a usual work with
+Workbench, where there is a need to keep changes of filesystem. Second is the
+opposite - if there is a need to test some software, but not necessary keep it
+in a Workbench, than it will act as a temporary copy of the system, so that
+next time fs-uae will be run, there will be no files of tested software
+cluttering around.
 
 And execution is as usual:
 
@@ -234,12 +239,53 @@ This module will do several steps (similar as with ``cd32`` wrapper):
 - optionally create new archive under the same name as the original one and
   replace it with original one.
 
-This module is quite useful in two use cases. First is a usual work with
-Workbench, where there is a need to keep changes of filesystem. Second is the
-opposite - if there is a need to test some software, but not necessary keep it
-in a Workbench, than it will act as a temporary copy of the system, so that
-next time fs-uae will be run, there will be no files of tested software
-cluttering around.
+savestate
+---------
+
+Options used:
+
+* ``wrapper`` (required) with ``archive`` as an value
+* ``wrapper_archiver`` (conditionally required) archiver to use for storage
+  save state
+* ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
+  message during extracting files
+* ``wrapper_save_state`` (optional) if set to "1", will archive save state
+  directory, defined as ``$CONFIG/[save-state-dir-name]`` using provided
+  ``wrapper_archiver`` archiver. If this option is enabled,
+  ``wrapper_archiver`` will be required.
+
+This module is primarily used to run emulator with read only media attached
+(like images of floppies or uncompressed CD-ROMs) and its purpose is to
+preserve save state which will be created as an archive alongside with original
+configuration file in selected archive format.
+
+Example configuration:
+
+.. code:: ini
+   :number-lines:
+
+   [config]
+   wrapper = savestate
+   wrapper_archiver = 7z
+   wrapper_gui_msg = 1
+   wrapper_save_state = 1
+   ...
+
+And execution is as usual:
+
+.. code:: shell-session
+
+   $ fs-uae-wrapper Sanity-Arte.fs-uae
+
+The steps would be as follows:
+
+- create temporary directory
+- extract save state (if ``wrapper_save_state`` is set to ``1`` and archive
+  with save exists)
+- copy configuration under name ``Config.fs-uae``
+- run the fs-uae emulator
+- optionally create archive with save state (if save state directory place is
+  *not* a global one)
 
 License
 =======
