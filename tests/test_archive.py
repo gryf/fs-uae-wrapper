@@ -43,13 +43,13 @@ class TestArchive(TestCase):
     @mock.patch('tempfile.mkdtemp')
     @mock.patch('fs_uae_wrapper.path.which')
     @mock.patch('fs_uae_wrapper.archive.Archive._make_archive')
-    @mock.patch('fs_uae_wrapper.base.Base._save_save')
-    @mock.patch('fs_uae_wrapper.base.Base._get_saves_dir')
-    @mock.patch('fs_uae_wrapper.base.Base._run_emulator')
-    @mock.patch('fs_uae_wrapper.base.Base._kickstart_option')
-    @mock.patch('fs_uae_wrapper.base.Base._copy_conf')
-    @mock.patch('fs_uae_wrapper.base.Base._load_save')
-    @mock.patch('fs_uae_wrapper.base.Base._extract')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._save_save')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._get_saves_dir')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._run_emulator')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._kickstart_option')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._copy_conf')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._load_save')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._extract')
     def test_run(self, extract, load_save, copy_conf, kick_option,
                  run_emulator, get_save_dir, save_state, make_arch, which,
                  mkdtemp):
@@ -102,8 +102,8 @@ class TestArchive(TestCase):
     @mock.patch('os.unlink')
     @mock.patch('shutil.rmtree')
     @mock.patch('fs_uae_wrapper.utils.create_archive')
-    @mock.patch('fs_uae_wrapper.base.Base._get_title')
-    @mock.patch('fs_uae_wrapper.base.Base._get_saves_dir')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._get_title')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._get_saves_dir')
     def test_make_archive(self, sdir, title, carch, rmt, unlink, rename):
 
         sdir.return_value = None

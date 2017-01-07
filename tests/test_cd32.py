@@ -11,29 +11,15 @@ from fs_uae_wrapper import utils
 
 class TestCD32(TestCase):
 
-    @mock.patch('fs_uae_wrapper.path.which')
-    def test_validate_options(self, which):
-
-        which.return_value = 'rar'
-
-        acd32 = cd32.CD32('Config.fs-uae', utils.CmdOption(), {})
-        self.assertFalse(acd32._validate_options())
-
-        acd32.all_options['wrapper'] = 'cd32'
-        self.assertFalse(acd32._validate_options())
-
-        acd32.all_options['wrapper_archive'] = 'fake.tgz'
-        self.assertTrue(acd32._validate_options())
-
     @mock.patch('tempfile.mkdtemp')
     @mock.patch('fs_uae_wrapper.path.which')
-    @mock.patch('fs_uae_wrapper.base.Base._save_save')
-    @mock.patch('fs_uae_wrapper.base.Base._get_saves_dir')
-    @mock.patch('fs_uae_wrapper.base.Base._run_emulator')
-    @mock.patch('fs_uae_wrapper.base.Base._kickstart_option')
-    @mock.patch('fs_uae_wrapper.base.Base._copy_conf')
-    @mock.patch('fs_uae_wrapper.base.Base._load_save')
-    @mock.patch('fs_uae_wrapper.base.Base._extract')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._save_save')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._get_saves_dir')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._run_emulator')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._kickstart_option')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._copy_conf')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._load_save')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._extract')
     def test_run(self, extract, load_save, copy_conf, kick_option,
                  run_emulator, get_save_dir, save_state, which, mkdtemp):
 

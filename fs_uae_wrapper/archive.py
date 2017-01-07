@@ -6,13 +6,12 @@ the temporary one.
 """
 import os
 import shutil
-import sys
 
 from fs_uae_wrapper import base
 from fs_uae_wrapper import utils
 
 
-class Archive(base.Base):
+class Archive(base.ArchiveBase):
     """
     Class for performing extracting archive, copying emulator files, and
     cleaning it back again
@@ -30,12 +29,6 @@ class Archive(base.Base):
             - copy configuration
             - run the emulation
             - optionally make archive save state
-
-        Params:
-            conf_file:      a relative path to provided configuration file
-            fsuae_options: is an CmdOption object created out of command line
-                            parameters
-            configuration:  is config dictionary created out of config file
         """
         if not super(Archive, self).run():
             return False
@@ -60,17 +53,6 @@ class Archive(base.Base):
                 return False
 
         return self._make_archive()
-
-    def _validate_options(self):
-
-        validation_result = super(Archive, self)._validate_options()
-
-        if 'wrapper_archive' not in self.all_options:
-            sys.stderr.write("Configuration lacks of required "
-                             "`wrapper_archive' option.\n")
-            validation_result = False
-
-        return validation_result
 
     def _make_archive(self):
         """

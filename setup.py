@@ -2,7 +2,7 @@
 """
 Setup for the fs-uae-wrapper
 """
-from distutils.core import setup
+from setuptools import setup
 
 
 setup(name='fs-uae-wrapper',

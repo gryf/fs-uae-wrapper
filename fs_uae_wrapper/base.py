@@ -29,7 +29,6 @@ class Base(object):
                                                    fsuae_options)
         self.dir = None
         self.save_filename = None
-        self.arch_filepath = None
 
     def run(self):
         """
@@ -46,7 +45,6 @@ class Base(object):
             return False
 
         self.dir = tempfile.mkdtemp()
-
         self._set_assets_paths()
 
         return True
@@ -93,12 +91,6 @@ class Base(object):
         conf_base = os.path.basename(self.conf_file)
         conf_base = os.path.splitext(conf_base)[0]
 
-        arch = self.all_options.get('wrapper_archive')
-        if arch:
-            if os.path.isabs(arch):
-                self.arch_filepath = arch
-            else:
-                self.arch_filepath = os.path.join(conf_abs_dir, arch)
         # set optional save_state
         arch_ext = utils.get_arch_ext(self.all_options.get('wrapper_archiver'))
         if arch_ext:
@@ -111,16 +103,6 @@ class Base(object):
         os.rename(os.path.join(self.dir, os.path.basename(self.conf_file)),
                   os.path.join(self.dir, 'Config.fs-uae'))
         return True
-
-    def _extract(self):
-        """Extract archive to temp dir"""
-
-        title = self._get_title()
-        curdir = os.path.abspath('.')
-        os.chdir(self.dir)
-        result = utils.extract_archive(self.arch_filepath, title)
-        os.chdir(curdir)
-        return result
 
     def _run_emulator(self, fsuae_options):
         """execute fs-uae in provided directory"""
@@ -232,3 +214,56 @@ class Base(object):
             return False
 
         return True
+
+
+class ArchiveBase(Base):
+    """
+    Base class for archive based wrapper modules
+    """
+    def __init__(self, conf_file, fsuae_options, configuration):
+        """
+        Params:
+            conf_file:      a relative path to provided configuration file
+            fsuae_options:  is an CmdOption object created out of command line
+                            parameters
+            configuration:  is config dictionary created out of config file
+        """
+        super(ArchiveBase, self).__init__(conf_file, fsuae_options,
+                                          configuration)
+        self.arch_filepath = None
+
+    def _set_assets_paths(self):
+        """
+        Set full paths for archive file (without extension) and for save state
+        archive file
+        """
+        super(ArchiveBase, self)._set_assets_paths()
+
+        conf_abs_dir = os.path.dirname(os.path.abspath(self.conf_file))
+        arch = self.all_options.get('wrapper_archive')
+        if arch:
+            if os.path.isabs(arch):
+                self.arch_filepath = arch
+            else:
+                self.arch_filepath = os.path.join(conf_abs_dir, arch)
+
+    def _extract(self):
+        """Extract archive to temp dir"""
+
+        title = self._get_title()
+        curdir = os.path.abspath('.')
+        os.chdir(self.dir)
+        result = utils.extract_archive(self.arch_filepath, title)
+        os.chdir(curdir)
+        return result
+
+    def _validate_options(self):
+
+        validation_result = super(ArchiveBase, self)._validate_options()
+
+        if 'wrapper_archive' not in self.all_options:
+            sys.stderr.write("Configuration lacks of required "
+                             "`wrapper_archive' option.\n")
+            validation_result = False
+
+        return validation_result

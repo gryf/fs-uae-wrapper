@@ -8,12 +8,10 @@ used as a base for save state (it will append '_save.7z' to the archive file
 name.
 
 """
-import sys
-
 from fs_uae_wrapper import base
 
 
-class CD32(base.Base):
+class CD32(base.ArchiveBase):
     """
     Class for performing extracting archive, copying emulator files, and
     cleaning it back again
@@ -52,16 +50,6 @@ class CD32(base.Base):
             return self._save_save()
 
         return True
-
-    def _validate_options(self):
-        validation_result = super(CD32, self)._validate_options()
-
-        if 'wrapper_archive' not in self.all_options:
-            sys.stderr.write("Configuration lacks of required "
-                             "`wrapper_archive' option.\n")
-            validation_result = False
-
-        return validation_result
 
 
 def run(config_file, fsuae_options, configuration):

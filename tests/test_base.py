@@ -99,34 +99,6 @@ class TestBase(TestCase):
         self.assertTrue(os.path.exists(os.path.join(self.dirname,
                                                     'Config.fs-uae')))
 
-    @mock.patch('fs_uae_wrapper.utils.extract_archive')
-    def test_extract(self, utils_extract):
-
-        bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})
-        bobj.arch_filepath = self.fname
-        bobj.dir = self.dirname
-
-        utils_extract.return_value = False
-
-        # message for the gui is taken from title in fs-uae conf or, if there
-        # is no such entry, use archive name, which is mandatory to provide
-        bobj.all_options = {'title': 'foo_game', 'wrapper_gui_msg': '1'}
-        self.assertFalse(bobj._extract())
-        utils_extract.assert_called_once_with(self.fname, 'foo_game')
-
-        utils_extract.reset_mock()
-        bobj.all_options = {'wrapper_archive': 'arch.tar',
-                            'wrapper_gui_msg': '1'}
-        self.assertFalse(bobj._extract())
-        utils_extract.assert_called_once_with(self.fname, 'arch.tar')
-
-        # lets pretend, the extracting has failed
-        utils_extract.reset_mock()
-        bobj.all_options = {'wrapper_gui_msg': '0'}
-        utils_extract.return_value = False
-        self.assertFalse(bobj._extract())
-        utils_extract.assert_called_once_with(self.fname, '')
-
     @mock.patch('fs_uae_wrapper.utils.run_command')
     def test_run_emulator(self, run):
 
@@ -247,12 +219,15 @@ class TestBase(TestCase):
         self.assertTrue(bobj._validate_options())
 
         bobj.all_options = {'wrapper': 'dummy',
-                            'wrapper_archiver': 'myarchiver'}
+                            'wrapper_save_state': '0'}
         self.assertTrue(bobj._validate_options())
 
         bobj.all_options = {'wrapper': 'dummy',
-                            'wrapper_save_state': '1',
-                            'wrapper_archiver': 'myarchiver'}
+                            'wrapper_archiver': 'rar'}
+        self.assertTrue(bobj._validate_options())
+
+        bobj.all_options = {'wrapper': 'dummy',
+                            'wrapper_save_state': '1'}
         self.assertFalse(bobj._validate_options())
 
         which.return_value = '7z'
@@ -276,9 +251,96 @@ class TestBase(TestCase):
         self.assertFalse(bobj.run())
 
         bobj.all_options = {'wrapper': 'dummy',
-                            'wrapper_archiver': 'rar'}
+                            'wrapper_archiver': 'rar',
+                            'wrapper_archive': 'foo.7z'}
         try:
             self.assertTrue(bobj.run())
             self.assertTrue(os.path.exists(bobj.dir))
         finally:
             bobj.clean()
+
+
+class TestArchiveBase(TestCase):
+
+    def setUp(self):
+        fd, self.fname = mkstemp()
+        self.dirname = mkdtemp()
+        self.confdir = mkdtemp()
+        os.close(fd)
+        self._argv = sys.argv[:]
+        sys.argv = ['fs-uae-wrapper']
+        self.curdir = os.path.abspath(os.curdir)
+
+    def tearDown(self):
+        os.chdir(self.curdir)
+        try:
+            shutil.rmtree(self.dirname)
+        except OSError:
+            pass
+        try:
+            shutil.rmtree(self.confdir)
+        except OSError:
+            pass
+        os.unlink(self.fname)
+        sys.argv = self._argv[:]
+
+    def test_set_assets_paths(self):
+
+        bobj = base.ArchiveBase('Config.fs-uae', utils.CmdOption(), {})
+        os.chdir(self.dirname)
+        bobj.conf_file = 'Config.fs-uae'
+        bobj.all_options = {'wrapper_archive': 'foo.7z',
+                            'wrapper_archiver': '7z'}
+
+        bobj._set_assets_paths()
+        full_path = os.path.join(self.dirname, 'Config_save.7z')
+        self.assertEqual(bobj.save_filename, full_path)
+
+        bobj.all_options = {'wrapper_archive':  '/home/user/foo.7z',
+                            'wrapper_archiver': '7z'}
+
+        bobj._set_assets_paths()
+        full_path = os.path.join(self.dirname, 'Config_save.7z')
+        self.assertEqual(bobj.save_filename, full_path)
+
+    @mock.patch('fs_uae_wrapper.utils.extract_archive')
+    def test_extract(self, utils_extract):
+
+        bobj = base.ArchiveBase('Config.fs-uae', utils.CmdOption(), {})
+        bobj.arch_filepath = self.fname
+        bobj.dir = self.dirname
+
+        utils_extract.return_value = False
+
+        # message for the gui is taken from title in fs-uae conf or, if there
+        # is no such entry, use archive name, which is mandatory to provide
+        bobj.all_options = {'title': 'foo_game', 'wrapper_gui_msg': '1'}
+        self.assertFalse(bobj._extract())
+        utils_extract.assert_called_once_with(self.fname, 'foo_game')
+
+        utils_extract.reset_mock()
+        bobj.all_options = {'wrapper_archive': 'arch.tar',
+                            'wrapper_gui_msg': '1'}
+        self.assertFalse(bobj._extract())
+        utils_extract.assert_called_once_with(self.fname, 'arch.tar')
+
+        # lets pretend, the extracting has failed
+        utils_extract.reset_mock()
+        bobj.all_options = {'wrapper_gui_msg': '0'}
+        utils_extract.return_value = False
+        self.assertFalse(bobj._extract())
+        utils_extract.assert_called_once_with(self.fname, '')
+
+    def test_validate_options(self):
+
+        bobj = base.ArchiveBase('Config.fs-uae', utils.CmdOption(), {})
+        bobj.all_options = {}
+
+        self.assertFalse(bobj._validate_options())
+
+        bobj.all_options = {'wrapper': 'dummy'}
+        self.assertFalse(bobj._validate_options())
+
+        bobj.all_options = {'wrapper': 'dummy',
+                            'wrapper_archive': 'myarchive.7z'}
+        self.assertTrue(bobj._validate_options())
