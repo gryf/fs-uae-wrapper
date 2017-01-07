@@ -110,14 +110,21 @@ class TestBase(TestCase):
         bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})
         bobj.dir = self.dirname
 
-        self.assertTrue(bobj._run_emulator([]))
+        self.assertTrue(bobj._run_emulator())
         run.assert_called_once_with(['fs-uae'])
 
         # Errors from emulator are not fatal to wrappers
         run.reset_mock()
         run.return_value = False
-        self.assertTrue(bobj._run_emulator([]))
+        self.assertTrue(bobj._run_emulator())
         run.assert_called_once_with(['fs-uae'])
+
+        # pass the options
+        bobj.fsuae_options = utils.CmdOption({'foo': '1'})
+        run.reset_mock()
+        run.return_value = False
+        self.assertTrue(bobj._run_emulator())
+        run.assert_called_once_with(['fs-uae', '--foo'])
 
     @mock.patch('fs_uae_wrapper.base.Base._get_saves_dir')
     @mock.patch('fs_uae_wrapper.utils.create_archive')

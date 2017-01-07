@@ -78,11 +78,11 @@ class Base(object):
                   os.path.join(self.dir, 'Config.fs-uae'))
         return True
 
-    def _run_emulator(self, fsuae_options):
-        """execute fs-uae in provided directory"""
+    def _run_emulator(self):
+        """execute fs-uae"""
         curdir = os.path.abspath('.')
         os.chdir(self.dir)
-        utils.run_command(['fs-uae'] + fsuae_options)
+        utils.run_command(['fs-uae'] + self.fsuae_options.list())
         os.chdir(curdir)
         return True
 

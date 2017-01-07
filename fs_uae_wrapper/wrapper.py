@@ -46,9 +46,9 @@ def usage():
 
 def run():
     """run wrapper module"""
-    config_file, cmd_options = parse_args()
+    config_file, fsuae_options = parse_args()
 
-    if 'help' in cmd_options:
+    if 'help' in fsuae_options:
         usage()
         sys.exit(0)
 
@@ -63,7 +63,7 @@ def run():
         sys.stderr.write('Error: Configuration file have syntax issues\n')
         sys.exit(2)
 
-    wrapper_module = cmd_options.get(WRAPPER_KEY)
+    wrapper_module = fsuae_options.get(WRAPPER_KEY)
     if not wrapper_module:
         wrapper_module = configuration.get(WRAPPER_KEY)
 
@@ -78,7 +78,7 @@ def run():
                              "exists.\n" % wrapper_module)
             sys.exit(3)
 
-    if not wrapper.run(config_file, cmd_options, configuration):
+    if not wrapper.run(config_file, fsuae_options, configuration):
         sys.exit(4)
 
 

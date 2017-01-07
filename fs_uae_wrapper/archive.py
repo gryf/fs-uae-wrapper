@@ -40,7 +40,7 @@ class Wrapper(base.ArchiveBase):
         if not self._copy_conf():
             return False
 
-        if not self._run_emulator(self.fsuae_options.list()):
+        if not self._run_emulator():
             return False
 
         if self._get_saves_dir():
