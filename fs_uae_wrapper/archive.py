@@ -24,7 +24,6 @@ class Archive(base.ArchiveBase):
         """
         Main function which accepts configuration file for FS-UAE
         It will do as follows:
-            - set needed full path for asset files
             - extract archive file
             - copy configuration
             - run the emulation
@@ -40,10 +39,6 @@ class Archive(base.ArchiveBase):
 
         if not self._copy_conf():
             return False
-
-        kick_opts = self._kickstart_option()
-        if kick_opts:
-            self.fsuae_options.update(kick_opts)
 
         if not self._run_emulator(self.fsuae_options.list()):
             return False

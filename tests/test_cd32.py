@@ -16,17 +16,15 @@ class TestCD32(TestCase):
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._save_save')
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._get_saves_dir')
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._run_emulator')
-    @mock.patch('fs_uae_wrapper.base.ArchiveBase._kickstart_option')
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._copy_conf')
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._load_save')
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._extract')
-    def test_run(self, extract, load_save, copy_conf, kick_option,
-                 run_emulator, get_save_dir, save_state, which, mkdtemp):
+    def test_run(self, extract, load_save, copy_conf, run_emulator,
+                 get_save_dir, save_state, which, mkdtemp):
 
         extract.return_value = False
         copy_conf.return_value = False
         load_save.return_value = False
-        kick_option.return_value = {}
         run_emulator.return_value = False
         get_save_dir.return_value = False
         save_state.return_value = False
@@ -49,10 +47,6 @@ class TestCD32(TestCase):
 
         load_save.return_value = True
         self.assertFalse(acd32.run())
-
-        kick_option.return_value = {'foo': 'bar'}
-        self.assertFalse(acd32.run())
-        self.assertDictEqual(acd32.fsuae_options, {'foo': 'bar'})
 
         run_emulator.return_value = True
         self.assertTrue(acd32.run())

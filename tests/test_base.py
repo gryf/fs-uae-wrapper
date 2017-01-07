@@ -48,27 +48,32 @@ class TestBase(TestCase):
         self.assertFalse(os.path.exists(self.dirname))
 
     @mock.patch('fs_uae_wrapper.utils.get_config')
-    def test_kickstart_option(self, get_config):
+    def test_normalize_options(self, get_config):
 
         bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})
-        get_config.return_value = {'foo': 'bar'}
-        self.assertDictEqual(bobj._kickstart_option(), {})
 
         get_config.return_value = {'kickstarts_dir': '/some/path'}
-        self.assertDictEqual(bobj._kickstart_option(),
-                             {'kickstarts_dir': '/some/path'})
+        bobj._normalize_options()
+        self.assertDictEqual(bobj.fsuae_options, {})
 
         os.chdir(self.dirname)
-        get_config.return_value = {'kickstarts_dir': '../some/path'}
+        get_config.return_value = {'foo': 'bar'}
+        bobj._normalize_options()
+        self.assertDictEqual(bobj.fsuae_options,
+                             {'foo': os.path.join(self.dirname, 'bar')})
+
+        get_config.return_value = {'floppies_dir': '../some/path'}
+        bobj.fsuae_options = utils.CmdOption()
         result = os.path.abspath(os.path.join(self.dirname, '../some/path'))
-        self.assertDictEqual(bobj._kickstart_option(),
-                             {'kickstarts_dir': result})
+        bobj._normalize_options()
+        self.assertDictEqual(bobj.fsuae_options, {'floppies_dir': result})
 
         bobj.conf_file = os.path.join(self.dirname, 'Config.fs-uae')
-        get_config.return_value = {'kickstarts_dir': '$CONFIG/../path'}
+        get_config.return_value = {'cdroms_dir': '$CONFIG/../path'}
+        bobj.fsuae_options = utils.CmdOption()
         result = os.path.abspath(os.path.join(self.dirname, '../path'))
-        self.assertDictEqual(bobj._kickstart_option(),
-                             {'kickstarts_dir': result})
+        bobj._normalize_options()
+        self.assertDictEqual(bobj.fsuae_options, {'cdroms_dir': result})
 
     def test_set_assets_paths(self):
 
@@ -239,6 +244,12 @@ class TestBase(TestCase):
                             'wrapper_save_state': '1',
                             'wrapper_archiver': '7z'}
         self.assertTrue(bobj._validate_options())
+
+        which.return_value = None
+        bobj.all_options = {'wrapper': 'dummy',
+                            'wrapper_save_state': '1',
+                            'wrapper_archiver': '7z'}
+        self.assertFalse(bobj._validate_options())
 
     @mock.patch('fs_uae_wrapper.path.which')
     def test_run_clean(self, which):

@@ -12,7 +12,7 @@ from fs_uae_wrapper import savestate
 from fs_uae_wrapper import utils
 
 
-class TestArchive(TestCase):
+class TestSaveState(TestCase):
 
     def setUp(self):
         self.dirname = mkdtemp()
@@ -31,14 +31,12 @@ class TestArchive(TestCase):
     @mock.patch('fs_uae_wrapper.base.Base._save_save')
     @mock.patch('fs_uae_wrapper.base.Base._get_saves_dir')
     @mock.patch('fs_uae_wrapper.base.Base._run_emulator')
-    @mock.patch('fs_uae_wrapper.base.Base._kickstart_option')
     @mock.patch('fs_uae_wrapper.base.Base._copy_conf')
     @mock.patch('fs_uae_wrapper.base.Base._load_save')
-    def test_run(self, load_save, copy_conf, kick_option, run_emulator,
-                 get_save_dir, save_state, which, mkdtemp):
+    def test_run(self, load_save, copy_conf, run_emulator, get_save_dir,
+                 save_state, which, mkdtemp):
 
         copy_conf.return_value = False
-        kick_option.return_value = False
         run_emulator.return_value = False
         get_save_dir.return_value = False
         save_state.return_value = False
@@ -57,10 +55,6 @@ class TestArchive(TestCase):
 
         copy_conf.return_value = True
         self.assertFalse(arch.run())
-
-        kick_option.return_value = {'foo': 'bar'}
-        self.assertFalse(arch.run())
-        self.assertDictEqual(arch.fsuae_options, {'foo': 'bar'})
 
         run_emulator.return_value = True
         self.assertTrue(arch.run())

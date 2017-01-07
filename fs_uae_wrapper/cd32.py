@@ -39,10 +39,6 @@ class CD32(base.ArchiveBase):
             if not method():
                 return False
 
-        kick_opts = self._kickstart_option()
-        if kick_opts:
-            self.fsuae_options.update(kick_opts)
-
         if not self._run_emulator(self.fsuae_options.list()):
             return False
 

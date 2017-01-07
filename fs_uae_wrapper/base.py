@@ -44,6 +44,7 @@ class Base(object):
         if not self._validate_options():
             return False
 
+        self._normalize_options()
         self.dir = tempfile.mkdtemp()
         self._set_assets_paths()
 
@@ -54,33 +55,6 @@ class Base(object):
         if self.dir:
             shutil.rmtree(self.dir)
         return
-
-    def _kickstart_option(self):
-        """
-        This is kind of hack - since we potentially can have a relative path
-        to kickstart directory, there is a need for getting this option from
-        configuration files (which unfortunately can be spanned all over the
-        different places, see https://fs-uae.net/configuration-files) and
-        check whether or not one of 'kickstarts_dir', 'kickstart_file' or
-        'kickstart_ext_file' options are set. In either case if one of those
-        options are set and are relative, they should be set to absolute path,
-        so that kickstart files can be found by relocated configuration file.
-        """
-
-        conf = utils.get_config(self.conf_file)
-
-        kick = {}
-
-        for key in ('kickstart_file', 'kickstart_ext_file', 'kickstarts_dir'):
-            val = conf.get(key)
-            if val:
-                if not os.path.isabs(val):
-                    val = utils.interpolate_variables(val, self.conf_file)
-                    kick[key] = os.path.abspath(val)
-                else:
-                    kick[key] = val
-
-        return kick
 
     def _set_assets_paths(self):
         """
@@ -192,6 +166,35 @@ class Base(object):
             save = save[:-1]
 
         return save
+
+    def _normalize_options(self):
+        """
+        Search and replace values for options which starts with $CONFIG with
+        absolute path for all options, except:
+            - save_states_dir
+
+        Configuration file will be placed in new directory, therefore it is
+        needed to calculate new paths so that emulator can find assets.
+        """
+        exclude_list = ['save_states_dir']
+        conf_abs_dir = os.path.dirname(os.path.abspath(self.conf_file))
+        changed_options = {}
+
+        for key, val in utils.get_config(self.conf_file).items():
+            if val.startswith('/'):
+                continue
+
+            if key in exclude_list:
+                continue
+
+            if val.startswith('$CONFIG'):
+                abspath = os.path.abspath(val.replace('$CONFIG', conf_abs_dir))
+                changed_options[key] = abspath
+                continue
+
+            changed_options[key] = os.path.abspath(val)
+
+        self.fsuae_options.update(changed_options)
 
     def _validate_options(self):
         """Validate mandatory options"""
