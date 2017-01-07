@@ -136,8 +136,9 @@ Options used:
   ``wrapper_archiver`` archiver. If this option is enabled,
   ``wrapper_archiver`` will be required.
 
-Let's see some sample config for a game, which is saved as
-``ChaosEngine.fs-uae``:
+Module ``cd32`` is used for running ``fs-uae`` with compressed CD images. For
+better understanding how it works, let's go through solid example. Here is an
+fragment of configuration file is saved as ``ChaosEngine.fs-uae``:
 
 .. code:: ini
 
@@ -156,8 +157,9 @@ Let's see some sample config for a game, which is saved as
 
    joystick_port_1_mode = cd32 gamepad
    platform = cd32
+   ...
 
-Next, the invocation of the wrapper would be as follows:
+Command line invocation of the wrapper would be as follows:
 
 .. code:: shell-session
 
@@ -200,6 +202,13 @@ Options used:
   ``wrapper_archiver`` archiver. If this option is enabled,
   ``wrapper_archiver`` will be required.
 
+This module is quite useful in two use cases. First is a usual work with
+Workbench, where there is a need to keep changes of filesystem. Second is the
+opposite - if there is a need to test some software, but not necessary keep it
+in a Workbench, than it will act as a temporary copy of the system, so that
+next time fs-uae will be run, there will be no files of tested software
+cluttering around.
+
 Example configuration:
 
 .. code:: ini
@@ -212,13 +221,6 @@ Example configuration:
    wrapper_persist_data = 1
    wrapper_save_state = 1
    ...
-
-This module is quite useful in two use cases. First is a usual work with
-Workbench, where there is a need to keep changes of filesystem. Second is the
-opposite - if there is a need to test some software, but not necessary keep it
-in a Workbench, than it will act as a temporary copy of the system, so that
-next time fs-uae will be run, there will be no files of tested software
-cluttering around.
 
 And execution is as usual:
 
@@ -246,8 +248,6 @@ Options used:
 
 * ``wrapper`` (required) with ``archive`` as an value
 * ``wrapper_archiver`` (required) archiver to use for storage save state
-* ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
-  message during extracting files
 
 This module is primarily used to run emulator with read only media attached
 (like images of floppies or uncompressed CD-ROMs) and its purpose is to
@@ -264,7 +264,6 @@ Example configuration:
    [config]
    wrapper = savestate
    wrapper_archiver = 7z
-   wrapper_gui_msg = 1
    ...
 
 And execution is as usual:
