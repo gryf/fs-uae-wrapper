@@ -83,7 +83,7 @@ class TestUtils(TestCase):
         which.return_value = None
 
         # No config
-        self.assertFalse(utils.operate_archive('non-existend.7z', 'foo', '',
+        self.assertFalse(utils.operate_archive('non-existent.7z', 'foo', '',
                                                None))
 
         # Archive type not known
@@ -114,45 +114,36 @@ class TestUtils(TestCase):
         create.assert_called_once()
         show.assert_called_once()
 
-    def test_extract_archive(self):
+    @mock.patch('fs_uae_wrapper.utils.operate_archive')
+    def test_extract_archive(self, operate):
 
         os.chdir(self.dirname)
 
-        # No config
-        self.assertFalse(utils.extract_archive('non-existend.7z'))
+        operate.return_value = True
+        self.assertTrue(utils.extract_archive('arch.7z'))
+        operate.assert_called_once_with('arch.7z', 'extract', '', None)
 
-        # Archive type not known
-        with open('unsupported-archive.ace', 'w') as fobj:
-            fobj.write("\n")
-        self.assertFalse(utils.extract_archive('unsupported-archive.ace'))
+        operate.reset_mock()
+        operate.return_value = False
+        self.assertFalse(utils.extract_archive('arch.7z', 'MyFoo',
+                                               ['foo', 'bar']))
+        operate.assert_called_once_with('arch.7z', 'extract',
+                                        "Extracting files for `MyFoo'. Please"
+                                        " be patient", ['foo', 'bar'])
 
-        # archive is known, but extraction will fail - we have an empty
-        # archive and there is no guarantee, that 7z exists on system where
-        # test will run
-        with open('supported-archive.7z', 'w') as fobj:
-            fobj.write("\n")
-        self.assertFalse(utils.extract_archive('supported-archive.7z'))
+    @mock.patch('fs_uae_wrapper.utils.operate_archive')
+    def test_create_archive(self, operate):
+        operate.return_value = True
+        self.assertTrue(utils.create_archive('arch.7z'))
+        operate.assert_called_once_with('arch.7z', 'create', '', None)
 
-    @mock.patch('fs_uae_wrapper.file_archive.Archive.create')
-    def test_create_archive(self, arch_create):
-        arch_create.return_value = True
-
-        os.chdir(self.dirname)
-
-        # No config
-        self.assertFalse(utils.extract_archive('non-existend.7z'))
-
-        # Archive type not known
-        with open('unsupported-archive.ace', 'w') as fobj:
-            fobj.write("\n")
-        self.assertFalse(utils.extract_archive('unsupported-archive.ace'))
-
-        # archive is known, but extraction will fail - we have an empty
-        # archive and there is no guarantee, that 7z exists on system where
-        # test will run
-        with open('supported-archive.7z', 'w') as fobj:
-            fobj.write("\n")
-        self.assertFalse(utils.extract_archive('supported-archive.7z'))
+        operate.reset_mock()
+        operate.return_value = False
+        self.assertFalse(utils.create_archive('arch.7z', 'MyFoo',
+                                              ['foo', 'bar']))
+        operate.assert_called_once_with('arch.7z', 'create',
+                                        "Creating archive for `MyFoo'. Please"
+                                        " be patient", ['foo', 'bar'])
 
     @mock.patch('fs_uae_wrapper.path.which')
     @mock.patch('fs_uae_wrapper.file_archive.Archive.extract')
@@ -178,6 +169,37 @@ class TestUtils(TestCase):
         self.assertDictEqual(merged, {'foo': '2', 'bar': 'zip', 'baz': '3'})
         self.assertDictEqual(conf, {'foo': '1', 'bar': 'zip'})
         self.assertDictEqual(other, {'foo': '2', 'baz': '3'})
+
+    @mock.patch('subprocess.call')
+    def test_run_command(self, call):
+        call.return_value = 0
+        self.assertTrue(utils.run_command(['ls']))
+        call.assert_called_once_with(['ls'])
+
+        call.reset_mock()
+        self.assertTrue(utils.run_command('ls -l'))
+        call.assert_called_once_with(['ls', '-l'])
+
+        call.return_value = 1
+        call.reset_mock()
+        self.assertFalse(utils.run_command(['ls', '-l']))
+        call.assert_called_once_with(['ls', '-l'])
+
+        call.reset_mock()
+        self.assertFalse(utils.run_command('ls'))
+        call.assert_called_once_with(['ls'])
+
+    @mock.patch('os.path.exists')
+    def test_get_config(self, exists):
+        exists.return_value = False
+
+        os.chdir(self.dirname)
+        self.assertDictEqual(utils.get_config('foo'), {})
+
+        with open('conf.fs-uae', 'w') as fobj:
+            fobj.write("[conf]\nwrapper=foo\n")
+        self.assertDictEqual(utils.get_config('conf.fs-uae'),
+                             {'wrapper': 'foo'})
 
 
 class TestCmdOptions(TestCase):
