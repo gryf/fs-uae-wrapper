@@ -145,8 +145,9 @@ def interpolate_variables(string, config_path, base=None):
     """
 
     if '$CONFIG' in string:
-        string = string.replace('$CONFIG',
-                                os.path.dirname(os.path.abspath(config_path)))
+        conf_path = os.path.dirname(os.path.abspath(config_path))
+        string = os.path.abspath(string.replace('$CONFIG', conf_path))
+
     if '$HOME' in string:
         string = string.replace('$HOME', os.path.expandvars('$HOME'))
 

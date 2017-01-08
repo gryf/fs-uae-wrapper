@@ -241,26 +241,26 @@ class TestCmdOptions(TestCase):
 
         itrpl = utils.interpolate_variables
 
-        string = 'foo = $CONFIG/../path/to/smth'
+        string = '$CONFIG/../path/to/smth'
         self.assertEqual(itrpl(string, '/home/user/Config.fs-uae'),
-                         'foo = /home/user/../path/to/smth')
-        string = 'bar = $HOME'
+                         '/home/path/to/smth')
+        string = '$HOME'
         expandv.return_value = '/home/user'
         self.assertEqual(itrpl(string, '/home/user/Config.fs-uae'),
-                         'bar = /home/user')
+                         '/home/user')
 
-        string = 'foo = $APP/$EXE'
+        string = '$APP/$EXE'
         find_exe.return_value = '/usr/bin/fs-uae'
         self.assertEqual(itrpl(string, '/home/user/Config.fs-uae'),
-                         'foo = /usr/bin/fs-uae//usr/bin/fs-uae')
+                         '/usr/bin/fs-uae//usr/bin/fs-uae')
 
-        string = 'docs = $DOCUMENTS'
+        string = '$DOCUMENTS'
         getenv.return_value = '/home/user/Docs'
         self.assertEqual(itrpl(string, '/home/user/Config.fs-uae'),
-                         'docs = /home/user/Docs')
+                         '/home/user/Docs')
 
-        string = 'baz = $BASE'
+        string = '$BASE'
         self.assertEqual(itrpl(string, '/home/user/Config.fs-uae'),
-                         'baz = $BASE')
+                         '$BASE')
         self.assertEqual(itrpl(string, '/home/user/Config.fs-uae', 'base'),
-                         'baz = base')
+                         'base')

@@ -195,7 +195,6 @@ class Base(object):
         for num in range(10):
             include_list.append('hard_drive_%d' % num)
 
-        conf_abs_dir = os.path.dirname(os.path.abspath(self.conf_file))
         changed_options = {}
 
         for key, val in utils.get_config(self.conf_file).items():
@@ -212,7 +211,7 @@ class Base(object):
                 continue
 
             if val.startswith('$CONFIG'):
-                abspath = os.path.abspath(val.replace('$CONFIG', conf_abs_dir))
+                abspath = utils.interpolate_variables(val, self.conf_file)
                 changed_options[key] = abspath
                 continue
 
