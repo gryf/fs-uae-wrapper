@@ -45,8 +45,8 @@ class Base(object):
         if not self._validate_options():
             return False
 
-        self._normalize_options()
         self.dir = tempfile.mkdtemp()
+        self._normalize_options()
         self._set_assets_paths()
 
         return True
@@ -144,7 +144,7 @@ class Base(object):
     def _get_saves_dir(self):
         """
         Return path to save state directory or None in cases:
-            - there is no save state dir set relative to config file
+            - there is no save state dir set relative to copied config file
             - save state dir is set globally
             - save state dir is set relative to the config file
             - save state dir doesn't exists
@@ -153,9 +153,9 @@ class Base(object):
         if not self.all_options.get('save_states_dir'):
             return None
 
-        if self.all_options['save_states_dir'].startswith('$CONFIG') and \
+        if self.all_options['save_states_dir'].startswith('$WRAPPER') and \
            '..' not in self.all_options['save_states_dir']:
-            save = self.all_options['save_states_dir'].replace('$CONFIG/', '')
+            save = self.all_options['save_states_dir'].replace('$WRAPPER/', '')
         else:
             return None
 
@@ -171,43 +171,47 @@ class Base(object):
     def _normalize_options(self):
         """
         Search and replace values for options which starts with $CONFIG with
-        absolute path for all options, except:
-            - save_states_dir
+        absolute path for all options.
 
         Configuration file will be placed in new directory, therefore it is
         needed to calculate new paths so that emulator can find assets.
         """
-        exclude_list = ['save_states_dir']
-        include_list = ['wrapper_archive', 'accelerator_rom', 'base_dir',
-                        'cdrom_drive_0', 'cdroms_dir', 'controllers_dir',
-                        'cpuboard_flash_ext_file', 'cpuboard_flash_file',
-                        'floppies_dir', 'floppy_overlays_dir', 'fmv_rom',
-                        'graphics_card_rom', 'hard_drives_dir',
-                        'kickstart_file', 'kickstarts_dir', 'logs_dir',
-                        'screenshots_output_dir', 'state_dir']
+        options = ['wrapper_archive', 'accelerator_rom', 'base_dir',
+                   'cdrom_drive_0', 'cdroms_dir', 'controllers_dir',
+                   'cpuboard_flash_ext_file', 'cpuboard_flash_file',
+                   'floppies_dir', 'floppy_overlays_dir', 'fmv_rom',
+                   'graphics_card_rom', 'hard_drives_dir', 'kickstart_file',
+                   'kickstarts_dir', 'logs_dir', 'save_states_dir',
+                   'screenshots_output_dir']
+
         for num in range(20):
-            include_list.append('cdrom_image_%d' % num)
-            include_list.append('floppy_image_%d' % num)
+            options.append('cdrom_image_%d' % num)
+            options.append('floppy_image_%d' % num)
 
         for num in range(4):
-            include_list.append('floppy_drive_%d' % num)
+            options.append('floppy_drive_%d' % num)
 
         for num in range(10):
-            include_list.append('hard_drive_%d' % num)
+            options.append('hard_drive_%d' % num)
 
         changed_options = {}
 
         for key, val in utils.get_config(self.conf_file).items():
-            if key in exclude_list:
-                continue
 
-            if key not in include_list:
+            if key not in options:
                 continue
 
             if val.startswith('/'):
                 continue
 
+            if val.startswith('~'):
+                continue
+
             if val.startswith('$HOME'):
+                continue
+
+            if val.startswith('$WRAPPER'):
+                changed_options[key] = val.replace('$WRAPPER', self.dir)
                 continue
 
             if val.startswith('$CONFIG'):

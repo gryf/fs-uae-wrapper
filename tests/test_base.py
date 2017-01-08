@@ -80,6 +80,18 @@ class TestBase(TestCase):
         bobj._normalize_options()
         self.assertDictEqual(bobj.fsuae_options, {})
 
+        get_config.return_value = {'cdroms_dir': '$WRAPPER/path'}
+        bobj.fsuae_options = utils.CmdOption()
+        bobj.dir = self.dirname
+        bobj._normalize_options()
+        self.assertDictEqual(bobj.fsuae_options,
+                             {'cdroms_dir': os.path.join(bobj.dir, 'path')})
+
+        get_config.return_value = {'cdroms_dir': '~/path'}
+        bobj.fsuae_options = utils.CmdOption()
+        bobj._normalize_options()
+        self.assertDictEqual(bobj.fsuae_options, {})
+
     def test_set_assets_paths(self):
 
         bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})
@@ -201,13 +213,13 @@ class TestBase(TestCase):
         bobj.all_options['save_states_dir'] = '/some/path'
         self.assertIsNone(bobj._get_saves_dir())
 
-        bobj.all_options['save_states_dir'] = '$CONFIG/../saves'
+        bobj.all_options['save_states_dir'] = '$WRAPPER/../saves'
         self.assertIsNone(bobj._get_saves_dir())
 
-        bobj.all_options['save_states_dir'] = '/foo/$CONFIG/saves'
+        bobj.all_options['save_states_dir'] = '/foo/$WRAPPER/saves'
         self.assertIsNone(bobj._get_saves_dir())
 
-        bobj.all_options['save_states_dir'] = '$CONFIG/saves'
+        bobj.all_options['save_states_dir'] = '$WRAPPER/saves'
         self.assertIsNone(bobj._get_saves_dir())
 
         path = os.path.join(self.dirname, 'saves')
@@ -219,7 +231,7 @@ class TestBase(TestCase):
         os.mkdir(path)
         self.assertEqual(bobj._get_saves_dir(), 'saves')
 
-        bobj.all_options['save_states_dir'] = '$CONFIG/saves/'
+        bobj.all_options['save_states_dir'] = '$WRAPPER/saves/'
         self.assertEqual(bobj._get_saves_dir(), 'saves')
 
     @mock.patch('fs_uae_wrapper.path.which')

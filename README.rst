@@ -98,6 +98,23 @@ If no ``wrapper`` option would be passed either as an config option or
 command line argument, all command line options will be passed to the fs-uae
 executable as-is.
 
+There is also new config variable introduced: ``$WRAPPER`` which have the same
+role as ``$CONFIG``, but apply for copied config. For instance - in module
+archive there are filesystem extracted to new location - to access this
+filesystem relatively to the copied configuration file it is enough to provide
+a config option:
+
+.. code:: ini
+
+   [config]
+   wrapper = archive
+   ...
+
+   hard_drive_0 = $WRAPPER/my_hardrive
+
+which means, that we are expecting to have system files on ``my_hardrive`` in
+directory, where configuration will be copied.
+
 Modules
 =======
 
