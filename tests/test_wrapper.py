@@ -67,11 +67,13 @@ class TestWrapper(TestCase):
     def test_parse_args(self):
 
         # Looking for configuration file... first, we have nothing
-        self.assertEqual(wrapper.parse_args(), (None, {}))
+        self.assertEqual(wrapper.parse_args(),
+                         (None, {'wrapper_verbose': 0, 'wrapper_quiet': 0}))
 
         # still no luck - nonexistent file
         sys.argv.append('there-is-no-config.fs-uae')
-        self.assertEqual(wrapper.parse_args(), (None, {}))
+        self.assertEqual(wrapper.parse_args(),
+                         (None, {'wrapper_verbose': 0, 'wrapper_quiet': 0}))
 
         # lets make it
         os.chdir(self.dirname)
@@ -79,7 +81,8 @@ class TestWrapper(TestCase):
             fobj.write('\n')
 
         self.assertEqual(wrapper.parse_args(),
-                         ('there-is-no-config.fs-uae', {}))
+                         ('there-is-no-config.fs-uae',
+                          {'wrapper_verbose': 0, 'wrapper_quiet': 0}))
 
         # remove argument, try to find default one
         sys.argv.pop()
@@ -88,7 +91,9 @@ class TestWrapper(TestCase):
         with open('Config.fs-uae', 'w') as fobj:
             fobj.write('\n')
 
-        self.assertEqual(wrapper.parse_args(), ('Config.fs-uae', {}))
+        self.assertEqual(wrapper.parse_args(),
+                         ('Config.fs-uae',
+                          {'wrapper_verbose': 0, 'wrapper_quiet': 0}))
 
         # add --wrapper-foo and --wrapper-bar options
         sys.argv.extend(['--wrapper=plain', '--wrapper_foo=1',
@@ -104,7 +109,9 @@ class TestWrapper(TestCase):
         self.assertEqual(conf, 'Config.fs-uae')
         self.assertDictEqual(fsopts, {'wrapper': 'plain',
                                       'wrapper_foo': '1',
-                                      'wrapper_bar': 'false'})
+                                      'wrapper_bar': 'false',
+                                      'wrapper_verbose': 0,
+                                      'wrapper_quiet': 0})
 
         # mix wrapper* params in commandline and config
         sys.argv = ['fs-uae-wrapper',
@@ -120,4 +127,6 @@ class TestWrapper(TestCase):
         self.assertDictEqual(fsopts, {'wrapper': 'plain',
                                       'wrapper_bar': 'false',
                                       'fullscreen': '1',
-                                      'fast_memory': '4096'})
+                                      'fast_memory': '4096',
+                                      'wrapper_verbose': 0,
+                                      'wrapper_quiet': 0})

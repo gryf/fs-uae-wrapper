@@ -57,10 +57,10 @@ class TestBase(TestCase):
         self.assertDictEqual(bobj.fsuae_options, {})
 
         os.chdir(self.dirname)
-        get_config.return_value = {'foo': 'bar'}
+        get_config.return_value = {'fmv_rom': 'bar'}
         bobj._normalize_options()
         self.assertDictEqual(bobj.fsuae_options,
-                             {'foo': os.path.join(self.dirname, 'bar')})
+                             {'fmv_rom': os.path.join(self.dirname, 'bar')})
 
         get_config.return_value = {'floppies_dir': '../some/path'}
         bobj.fsuae_options = utils.CmdOption()

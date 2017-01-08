@@ -4,11 +4,31 @@ Wrapper for FS-UAE to perform some actions before and or after running the
 emulator, if appropriate option is enabled.
 """
 import importlib
+import logging
 import os
 import sys
 
 from fs_uae_wrapper import utils
 from fs_uae_wrapper import WRAPPER_KEY
+
+
+def setup_logger(options):
+    """Setup logger format and level"""
+
+    level = logging.WARNING
+
+    if options['wrapper_quiet']:
+        level = logging.ERROR
+        if options['wrapper_quiet'] > 1:
+            level = logging.CRITICAL
+
+    if options['wrapper_verbose']:
+        level = logging.INFO
+        if options['wrapper_verbose'] > 1:
+            level = logging.DEBUG
+
+    logging.basicConfig(level=level,
+                        format="%(asctime)s %(levelname)s: %(message)s")
 
 
 def parse_args():
@@ -18,7 +38,16 @@ def parse_args():
     """
     fs_conf = None
     options = utils.CmdOption()
+    options['wrapper_verbose'] = 0
+    options['wrapper_quiet'] = 0
+
     for parameter in sys.argv[1:]:
+        if parameter in ['-v', '-q']:
+            if parameter == '-v':
+                options['wrapper_verbose'] += 1
+            if parameter == '-q':
+                options['wrapper_quiet'] += 1
+            continue
         try:
             options.add(parameter)
         except AttributeError:
@@ -47,6 +76,9 @@ def usage():
 def run():
     """run wrapper module"""
     config_file, fsuae_options = parse_args()
+    setup_logger(fsuae_options)
+    del fsuae_options['wrapper_verbose']
+    del fsuae_options['wrapper_quiet']
 
     if 'help' in fsuae_options:
         usage()

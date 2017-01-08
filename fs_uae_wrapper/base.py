@@ -177,14 +177,34 @@ class Base(object):
         needed to calculate new paths so that emulator can find assets.
         """
         exclude_list = ['save_states_dir']
+        include_list = ['wrapper_archive', 'accelerator_rom', 'base_dir',
+                        'cdrom_drive_0', 'cdroms_dir', 'controllers_dir',
+                        'cpuboard_flash_ext_file', 'cpuboard_flash_file',
+                        'floppies_dir', 'floppy_overlays_dir', 'fmv_rom',
+                        'graphics_card_rom', 'hard_drives_dir',
+                        'kickstart_file', 'kickstarts_dir', 'logs_dir',
+                        'screenshots_output_dir', 'state_dir']
+        for num in range(20):
+            include_list.append('cdrom_image_%d' % num)
+            include_list.append('floppy_image_%d' % num)
+
+        for num in range(4):
+            include_list.append('floppy_drive_%d' % num)
+
+        for num in range(10):
+            include_list.append('hard_drive_%d' % num)
+
         conf_abs_dir = os.path.dirname(os.path.abspath(self.conf_file))
         changed_options = {}
 
         for key, val in utils.get_config(self.conf_file).items():
-            if val.startswith('/'):
+            if key in exclude_list:
                 continue
 
-            if key in exclude_list:
+            if key not in include_list:
+                continue
+
+            if val.startswith('/'):
                 continue
 
             if val.startswith('$CONFIG'):
