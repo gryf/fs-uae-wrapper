@@ -78,7 +78,14 @@ def run():
                              "exists.\n" % wrapper_module)
             sys.exit(3)
 
-    if not wrapper.run(config_file, fsuae_options, configuration):
+    runner = wrapper.Wrapper(config_file, fsuae_options, configuration)
+
+    try:
+        exit_code = runner.run()
+    finally:
+        runner.clean()
+
+    if not exit_code:
         sys.exit(4)
 
 
