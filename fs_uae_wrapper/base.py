@@ -1,9 +1,10 @@
 """
 Base class for all wrapper modules
 """
+import logging
 import os
-import sys
 import shutil
+import sys
 import tempfile
 
 from fs_uae_wrapper import utils
@@ -117,7 +118,7 @@ class Base(object):
         curdir = os.path.abspath('.')
 
         if not utils.create_archive(self.save_filename, '', [save_path]):
-            sys.stderr.write('Error: archiving save state failed\n')
+            logging.error('Error: archiving save state failed.')
             os.chdir(curdir)
             return False
 
@@ -219,21 +220,20 @@ class Base(object):
     def _validate_options(self):
         """Validate mandatory options"""
         if 'wrapper' not in self.all_options:
-            sys.stderr.write("Configuration lacks of required "
-                             "`wrapper' option.\n")
+            logging.error("Configuration lacks of required `wrapper' option.")
             return False
 
         if self.all_options.get('wrapper_save_state', '0') == '0':
             return True
 
         if 'wrapper_archiver' not in self.all_options:
-            sys.stderr.write("Configuration lacks of required "
-                             "`wrapper_archiver' option.\n")
+            logging.error("Configuration lacks of required "
+                          "`wrapper_archiver' option.")
             return False
 
         if not path.which(self.all_options['wrapper_archiver']):
-            sys.stderr.write("Cannot find archiver `%s'." %
-                             self.all_options['wrapper_archiver'])
+            logging.error("Cannot find archiver `%s'.",
+                          self.all_options['wrapper_archiver'])
             return False
 
         return True

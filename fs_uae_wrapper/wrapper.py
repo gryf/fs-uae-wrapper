@@ -62,7 +62,7 @@ def parse_args():
 
 def usage():
     """Print help"""
-    sys.stdout.write("Usage: %s [conf-file] [fs-uae-option...]\n\n"
+    sys.stdout.write("Usage: %s [conf-file] [-v] [-q] [fs-uae-option...]\n\n"
                      % sys.argv[0])
     sys.stdout.write("Config file is not required, if `Config.fs-uae' "
                      "exists in the current\ndirectory, although it might "
@@ -85,14 +85,14 @@ def run():
         sys.exit(0)
 
     if not config_file:
-        sys.stderr.write('Error: Configuration file not found\nSee --help'
-                         ' for usage\n')
+        logging.error('Error: Configuration file not found. See --help'
+                      ' for usage')
         sys.exit(1)
 
     configuration = utils.get_config_options(config_file)
 
     if configuration is None:
-        sys.stderr.write('Error: Configuration file have syntax issues\n')
+        logging.error('Error: Configuration file have syntax issues')
         sys.exit(2)
 
     wrapper_module = fsuae_options.get(WRAPPER_KEY)
@@ -106,8 +106,8 @@ def run():
             wrapper = importlib.import_module('fs_uae_wrapper.' +
                                               wrapper_module)
         except ImportError:
-            sys.stderr.write("Error: provided wrapper module: `%s' doesn't "
-                             "exists.\n" % wrapper_module)
+            logging.error("Error: provided wrapper module: `%s' doesn't "
+                          "exists.", wrapper_module)
             sys.exit(3)
 
     runner = wrapper.Wrapper(config_file, fsuae_options, configuration)

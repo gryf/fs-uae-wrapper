@@ -3,8 +3,8 @@ File archive classes
 """
 import os
 import subprocess
-import sys
 import re
+import logging
 
 from fs_uae_wrapper import path
 
@@ -25,10 +25,12 @@ class Archive(object):
         Create archive. Return True on success, False otherwise.
         """
         files = files if files else ['.']
+        logging.debug("Calling `%s %s %s %s'.", self._compress,
+                      " ".join(self.ADD), arch_name, " ".join(files))
         result = subprocess.call([self._compress] + self.ADD + [arch_name]
                                  + files)
         if result != 0:
-            sys.stderr.write("Unable to create archive `%s'\n" % arch_name)
+            logging.error("Unable to create archive `%s'.", arch_name)
             return False
         return True
 
@@ -37,13 +39,15 @@ class Archive(object):
         Extract archive. Return True on success, False otherwise.
         """
         if not os.path.exists(arch_name):
-            sys.stderr.write("Archive `%s' doesn't exists.\n" % arch_name)
+            logging.error("Archive `%s' doesn't exists.", arch_name)
             return False
 
+        logging.debug("Calling `%s %s %s'.", self._compress,
+                      " ".join(self.ADD), arch_name)
         result = subprocess.call([self._decompress] + self.EXTRACT +
                                  [arch_name])
         if result != 0:
-            sys.stderr.write("Unable to extract archive `%s'\n" % arch_name)
+            logging.error("Unable to extract archive `%s'.", arch_name)
             return False
         return True
 
@@ -55,10 +59,12 @@ class TarArchive(Archive):
 
     def create(self, arch_name, files=None):
         files = files if files else sorted(os.listdir('.'))
+        logging.debug("Calling `%s %s %s %s'.", self._compress,
+                      " ".join(self.ADD), arch_name, " ".join(files))
         result = subprocess.call([self._compress] + self.ADD + [arch_name] +
                                  files)
         if result != 0:
-            sys.stderr.write("Unable to create archive `%s'\n" % arch_name)
+            logging.error("Unable to create archive `%s'.", arch_name)
             return False
         return True
 
@@ -101,8 +107,8 @@ class LzxArchive(Archive):
 
     @classmethod
     def create(self, arch_name, files=None):
-        sys.stderr.write('Cannot create LZX archive. Only extracting is'
-                         'supported\n')
+        logging.error('Cannot create LZX archive. Only extracting is'
+                      'supported.')
         return False
 
 
@@ -112,14 +118,16 @@ class RarArchive(Archive):
     def create(self, arch_name, files=None):
         files = files if files else sorted(os.listdir('.'))
         if self.archiver == 'unrar':
-            sys.stderr.write('Cannot create RAR archive. Only extracting is'
-                             'supported by unrar.\n')
+            logging.error('Cannot create RAR archive. Only extracting is'
+                          'supported by unrar.')
             return False
 
+        logging.debug("Calling `%s %s %s %s'.", self._compress,
+                      " ".join(self.ADD), arch_name, " ".join(files))
         result = subprocess.call([self._compress] + self.ADD + [arch_name] +
                                  files)
         if result != 0:
-            sys.stderr.write("Unable to create archive `%s'\n" % arch_name)
+            logging.error("Unable to create archive `%s'.", arch_name)
             return False
         return True
 
@@ -174,13 +182,13 @@ def get_archiver(arch_name):
 
     archiver = Archivers.get(ext)
     if not archiver:
-        sys.stderr.write("Unable find archive type for `%s'\n" % arch_name)
+        logging.error("Unable find archive type for `%s'.", arch_name)
         return None
 
     archobj = archiver()
     if archobj.archiver is None:
-        sys.stderr.write("Unable find executable for operating on files"
-                         " `*%s'\n" % ext)
+        logging.error("Unable find executable for operating on files `*%s'.",
+                      ext)
         return None
 
     return archobj

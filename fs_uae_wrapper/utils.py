@@ -2,9 +2,9 @@
 Misc utilities
 """
 from distutils import spawn
+import logging
 import os
 import subprocess
-import sys
 try:
     import configparser
 except ImportError:
@@ -115,10 +115,10 @@ def run_command(cmd):
     if not isinstance(cmd, list):
         cmd = cmd.split()
 
+    logging.debug("Executing `%s'.", " ".join(cmd))
     code = subprocess.call(cmd)
     if code != 0:
-        sys.stderr.write('Command `{0}` returned non 0 exit '
-                         'code\n'.format(cmd[0]))
+        logging.error('Command `%s` returned non 0 exit code.', cmd[0])
         return False
     return True
 
