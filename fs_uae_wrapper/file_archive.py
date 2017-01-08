@@ -17,15 +17,15 @@ class Archive(object):
 
     def __init__(self):
         self.archiver = path.which(self.ARCH)
-        self._compess = self.archiver
-        self._decompess = self.archiver
+        self._compress = self.archiver
+        self._decompress = self.archiver
 
     def create(self, arch_name, files=None):
         """
         Create archive. Return True on success, False otherwise.
         """
         files = files if files else ['.']
-        result = subprocess.call([self._compess] + self.ADD + [arch_name]
+        result = subprocess.call([self._compress] + self.ADD + [arch_name]
                                  + files)
         if result != 0:
             sys.stderr.write("Unable to create archive `%s'\n" % arch_name)
@@ -40,7 +40,7 @@ class Archive(object):
             sys.stderr.write("Archive `%s' doesn't exists.\n" % arch_name)
             return False
 
-        result = subprocess.call([self._decompess] + self.EXTRACT +
+        result = subprocess.call([self._decompress] + self.EXTRACT +
                                  [arch_name])
         if result != 0:
             sys.stderr.write("Unable to extract archive `%s'\n" % arch_name)
@@ -55,7 +55,7 @@ class TarArchive(Archive):
 
     def create(self, arch_name, files=None):
         files = files if files else sorted(os.listdir('.'))
-        result = subprocess.call([self._compess] + self.ADD + [arch_name] +
+        result = subprocess.call([self._compress] + self.ADD + [arch_name] +
                                  files)
         if result != 0:
             sys.stderr.write("Unable to create archive `%s'\n" % arch_name)
@@ -86,7 +86,7 @@ class ZipArchive(Archive):
     def __init__(self):
         super(ZipArchive, self).__init__()
         if self.archiver == 'zip':
-            self._decompess = path.which('unzip')
+            self._decompress = path.which('unzip')
             ZipArchive.ADD = ['-r']
             ZipArchive.EXTRACT = []
 
@@ -116,7 +116,7 @@ class RarArchive(Archive):
                              'supported by unrar.\n')
             return False
 
-        result = subprocess.call([self._compess] + self.ADD + [arch_name] +
+        result = subprocess.call([self._compress] + self.ADD + [arch_name] +
                                  files)
         if result != 0:
             sys.stderr.write("Unable to create archive `%s'\n" % arch_name)

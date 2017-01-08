@@ -143,7 +143,6 @@ class TestArchive(TestCase):
         self.assertFalse(arch.create('foo.tar'))
         call.assert_called_once_with(['tar', 'cf', 'foo.tar', 'bar', 'foo'])
 
-
     @mock.patch('fs_uae_wrapper.path.which')
     @mock.patch('subprocess.call')
     def test_lha(self, call, which):
@@ -226,8 +225,8 @@ class TestArchive(TestCase):
 
         which.side_effect = ['zip', 'unzip']
         arch = file_archive.ZipArchive()
-        self.assertEqual(arch._compess, 'zip')
-        self.assertEqual(arch._decompess, 'unzip')
+        self.assertEqual(arch._compress, 'zip')
+        self.assertEqual(arch._decompress, 'unzip')
 
     @mock.patch('fs_uae_wrapper.path.which')
     @mock.patch('subprocess.call')
@@ -268,7 +267,7 @@ class TestArchive(TestCase):
 
         call.reset_mock()
         call.return_value = 0
-        arch._compess = arch._decompess = arch.archiver = 'unrar'
+        arch._compress = arch._decompress = arch.archiver = 'unrar'
 
         self.assertFalse(arch.create('foo'))
         call.assert_not_called()
@@ -308,11 +307,11 @@ class TestArchivers(TestCase):
         archivers = file_archive.Archivers
         self.assertEqual(archivers.get_extension_by_name('tar'), '.tar')
         self.assertEqual(archivers.get_extension_by_name('tgz'), '.tar.gz')
-        self.assertEqual(archivers.get_extension_by_name('tar.bz2'), '.tar.bz2')
+        self.assertEqual(archivers.get_extension_by_name('tar.bz2'),
+                         '.tar.bz2')
         self.assertEqual(archivers.get_extension_by_name('tar.xz'), '.tar.xz')
         self.assertEqual(archivers.get_extension_by_name('rar'), '.rar')
         self.assertEqual(archivers.get_extension_by_name('7z'), '.7z')
         self.assertEqual(archivers.get_extension_by_name('lha'), '.lha')
         self.assertEqual(archivers.get_extension_by_name('lzx'), '.lzx')
         self.assertIsNone(archivers.get_extension_by_name('ace'))
-
