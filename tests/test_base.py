@@ -75,6 +75,11 @@ class TestBase(TestCase):
         bobj._normalize_options()
         self.assertDictEqual(bobj.fsuae_options, {'cdroms_dir': result})
 
+        get_config.return_value = {'cdroms_dir': '$HOME/path'}
+        bobj.fsuae_options = utils.CmdOption()
+        bobj._normalize_options()
+        self.assertDictEqual(bobj.fsuae_options, {})
+
     def test_set_assets_paths(self):
 
         bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})

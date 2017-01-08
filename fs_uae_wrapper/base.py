@@ -208,6 +208,9 @@ class Base(object):
             if val.startswith('/'):
                 continue
 
+            if val.startswith('$HOME'):
+                continue
+
             if val.startswith('$CONFIG'):
                 abspath = os.path.abspath(val.replace('$CONFIG', conf_abs_dir))
                 changed_options[key] = abspath
