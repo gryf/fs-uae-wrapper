@@ -46,13 +46,3 @@ class Wrapper(base.Base):
                 return False
 
         return True
-
-
-def run(config_file, fsuae_options, configuration):
-    """Run fs-uae with provided config file and options"""
-
-    runner = Wrapper(config_file, fsuae_options, configuration)
-    try:
-        return runner.run()
-    finally:
-        runner.clean()
