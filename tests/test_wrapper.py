@@ -28,7 +28,7 @@ class TestWrapper(TestCase):
         os.unlink(self.fname)
         sys.argv = self._argv[:]
 
-    @mock.patch('fs_uae_wrapper.plain.run')
+    @mock.patch('fs_uae_wrapper.plain.Wrapper.run')
     def test_run(self, mock_plain_run):
 
         sys.argv.append('--help')

@@ -11,8 +11,12 @@ from fs_uae_wrapper import utils
 
 class TestPlainModule(TestCase):
 
-    @mock.patch('subprocess.call')
-    def test_show(self, subprocess_call):
+    @mock.patch('fs_uae_wrapper.utils.run_command')
+    def test_run(self, run_command):
+        wrapper = plain.Wrapper('some.conf', utils.CmdOption(), {})
+        wrapper.run()
+        run_command.assert_called_once_with(['fs-uae', 'some.conf'])
 
-        plain.run('some.conf', utils.CmdOption(), None)
-        subprocess_call.assert_called_once()
+    def test_clean(self):
+        wrapper = plain.Wrapper('some.conf', utils.CmdOption(), {})
+        self.assertIsNone(wrapper.clean())

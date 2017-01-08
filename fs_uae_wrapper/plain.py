@@ -4,24 +4,24 @@
 Simple class for executing fs-uae with specified parameters. This is a
 failsafe class for running fs-uae.
 """
-import subprocess
-import sys
+from fs_uae_wrapper import base
+from fs_uae_wrapper import utils
 
 
-def run_plain(conf_file, fs_uae_options):
-    """
-    Run the emulation.
-    conf_file is a path to the configuration,
-    fs_uae_options is an dict-like object which contains commandline options to
-                   be passed to fs-uae
-    """
-    try:
-        subprocess.call(['fs-uae'] + [conf_file] + fs_uae_options.list())
-    except subprocess.CalledProcessError:
-        sys.stderr.write('Warning: fs-uae returned non 0 exit code\n')
-    return True
+class Wrapper(base.Base):
+    """Simple class for running fs-uae"""
 
+    def run(self):
+        """
+        Main function which run FS-UAE
+        """
+        self._run_emulator()
 
-def run(config_file, fs_uae_options, _):
-    """Run fs-uae with provided config file and options"""
-    return run_plain(config_file, fs_uae_options)
+    def _run_emulator(self):
+        """execute fs-uae"""
+        utils.run_command(['fs-uae'] + [self.conf_file] +
+                          self.fsuae_options.list())
+
+    def clean(self):
+        """Do the cleanup. Here - just do nothing"""
+        return
