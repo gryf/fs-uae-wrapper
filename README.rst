@@ -43,10 +43,8 @@ archives. Fs-uae-wrapper supports several types of archives:
 
 - `zip`_
 
-There are several archive types which are supported, ranging from tar
-(compressed with gzip, bzip2 and xz), 7z, rar, zip. lha and lzx. All of those
-formats should have corresponding decompressors available in the system,
-otherwise archive extraction will fail.
+All of those formats should have corresponding decompressors available in the
+system, otherwise archive extraction will fail.
 
 Installation
 ============
@@ -149,7 +147,7 @@ Options used:
 * ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
   message during extracting files
 * ``wrapper_save_state`` (optional) if set to "1", will load/archive save state
-  directory, defined as ``$CONFIG/[save-state-dir-name]`` using provided
+  directory, defined as ``$WRAPPER/[save-state-dir-name]`` using provided
   ``wrapper_archiver`` archiver. If this option is enabled,
   ``wrapper_archiver`` will be required.
 
@@ -170,7 +168,7 @@ fragment of configuration file is saved as ``ChaosEngine.fs-uae``:
 
    cdrom_drive_0 = Chaos Engine, The (1994)(Renegade)(M4)[!][CDD3445].cue
 
-   save_states_dir = $CONFIG/fs-uae-save/
+   save_states_dir = $WRAPPER/fs-uae-save/
 
    joystick_port_1_mode = cd32 gamepad
    platform = cd32
@@ -215,7 +213,7 @@ Options used:
 * ``wrapper_persist_data`` (optional) if set to "1", will compress (possibly
   changed) data, replacing original archive
 * ``wrapper_save_state`` (optional) if set to "1", will archive save state
-  directory, defined as ``$CONFIG/[save-state-dir-name]`` using provided
+  directory, defined as ``$WRAPPER/[save-state-dir-name]`` using provided
   ``wrapper_archiver`` archiver. If this option is enabled,
   ``wrapper_archiver`` will be required.
 
