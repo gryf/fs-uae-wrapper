@@ -12,7 +12,7 @@ This little utility is a wrapper on great FS-UAE_ emulator, to perform some
 actions, like uncompressing archived files (CD ROMs images, filesystems),
 launch the emulator and archive emulator save state.
 
-As an example, if there is a collection of CD³² game files and one want to
+As an example, if there is a collection of CD³² game files and you want to
 provide configuration for each game, but want to keep ISO images with
 corresponding files in archive (due to size of those images) than FS-UAE
 Wrapper is a way to achieve this.
@@ -28,8 +28,7 @@ Requirements
 - Python (2 or 3)
 - `fs-uae`_ (obviously :)
 
-Also, there should be archivers programs available for compress/decompress
-archives. Fs-uae-wrapper supports several types of archives:
+Fs-uae-wrapper supports several types of archives:
 
 - `7z`_
 - `lha`_
@@ -43,23 +42,35 @@ archives. Fs-uae-wrapper supports several types of archives:
 
 - `zip`_
 
-All of those formats should have corresponding decompressors available in the
-system, otherwise archive extraction will fail.
+All of those formats should have corresponding software available in the
+system, otherwise archive extraction/compression will fail.
 
 Installation
 ============
 
-Just perform (preferably in ``virtualenv``) a command:
+FS-UAE Wrapper is available on `CheeseShop`_ (or python package index if you
+will). To install it, you can simply invoke (preferably in ``virtualenv``) a
+command:
 
 .. code:: shell-session
 
    $ pip install fs-uae-wrapper
 
+Note, that if ``virtualenv`` was used, there is no need for activating it every
+time, since if invoke wrapper like this:
+
+.. code:: shell-session
+
+   $ /path/to/virtualenv/bin/fs-uae-wrapper
+
+you should be able run the wrapper properly. *Tested only on Linux :)*.
+
 Usage
 =====
 
-After installation you should be able to access new command
-``fs-uae-wrapper``, and its invocation is identical like ``fs-uae`` binary:
+After installation you should be able to access new command ``fs-uae-wrapper``
+(or use the full path to the ``virtualenv`` like on the section above), and it's
+invocation is identical like ``fs-uae`` binary:
 
 .. code:: shell-session
 
@@ -71,9 +82,9 @@ directly in fs-uae configuration or passed as an option:
 .. code:: ini
 
    [config]
-   ...
+   # ...
    wrapper = cd32
-   ...
+   # ...
 
 or
 
@@ -87,14 +98,18 @@ specific module will be loaded and depending on the module, there would be
 performed specific tasks before ``fs-uae`` is launched and after it.
 
 Assumption is, that configuration file are written in portable way, so the are
-saved as `relative configuration file`_ (hence the name ``Config.fs-uae``, even
-if the are named differently. If certain wrapper is specified, it will create
-temporary directory and place the configuration file there as
+saved as `relative configuration file`_ (hence the name ``Config.fs-uae``),
+even if the are named differently. If certain wrapper is specified, it will
+create temporary directory and place the configuration file there as
 ``Config.fs-uae``.
 
 If no ``wrapper`` option would be passed either as an config option or
 command line argument, all command line options will be passed to the fs-uae
 executable as-is.
+
+Note, that you can also pass all *wrapper* options via commandline in the very
+same way as you can pass config options to `fs-uae`, so you don't have to
+modify original configuration if you don't want to.
 
 There is also new config variable introduced: ``$WRAPPER`` which have the same
 role as ``$CONFIG``, but apply for copied config. For instance - in module
@@ -106,7 +121,7 @@ a config option:
 
    [config]
    wrapper = archive
-   ...
+   # ...
 
    hard_drive_0 = $WRAPPER/my_hardrive
 
@@ -116,7 +131,7 @@ directory, where configuration will be copied.
 Modules
 =======
 
-Currently, three wrapper modules are available:
+Currently, couple of wrapper modules are available:
 
 - plain
 - cd32
@@ -172,7 +187,7 @@ fragment of configuration file is saved as ``ChaosEngine.fs-uae``:
 
    joystick_port_1_mode = cd32 gamepad
    platform = cd32
-   ...
+   # ...
 
 Command line invocation of the wrapper would be as follows:
 
@@ -235,7 +250,7 @@ Example configuration:
    wrapper_gui_msg = 1
    wrapper_persist_data = 1
    wrapper_save_state = 1
-   ...
+   # ...
 
 And execution is as usual:
 
@@ -274,12 +289,11 @@ set to value ``1`` in this module.
 Example configuration:
 
 .. code:: ini
-   :number-lines:
 
    [config]
    wrapper = savestate
    wrapper_archiver = 7z
-   ...
+   # ...
 
 And execution is as usual:
 
@@ -310,3 +324,4 @@ This work is licensed on 3-clause BSD license. See LICENSE file for details.
 .. _lzx: http://aminet.net/package/misc/unix/unlzx.c.readme
 .. _tar: https://www.gnu.org/software/tar/
 .. _zip: http://www.info-zip.org
+.. _CheeseShop: https://pypi.python.org/pypi/fs-/fs-uae-wrapperuae-wrapper
