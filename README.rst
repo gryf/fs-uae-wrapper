@@ -199,7 +199,7 @@ Now, there several thing will happen:
 
 - Config file will be read, and wrapper module will be found
 - New temporary directory will be created
-- Archive with game assists will be extracted in that directory
+- Archive with game assets will be extracted in that directory
 - Configuration file will be copied into that directory, and renamed to
   ``Config.fs-uae``
 - If ``wrapper_save_state`` is set, and there is saved state archive, it also
