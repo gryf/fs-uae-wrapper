@@ -144,6 +144,7 @@ def interpolate_variables(string, config_path, base=None):
         - $BASE
     """
 
+    _string = string
     if '$CONFIG' in string:
         conf_path = os.path.dirname(os.path.abspath(config_path))
         string = os.path.abspath(string.replace('$CONFIG', conf_path))
@@ -166,7 +167,9 @@ def interpolate_variables(string, config_path, base=None):
         if '$BASE' in string:
             string = string.replace('$BASE', base)
 
-    return string
+    if os.path.exists(string):
+        return string
+    return _string
 
 
 def get_config(conf_file):

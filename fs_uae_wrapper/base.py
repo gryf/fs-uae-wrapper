@@ -219,7 +219,11 @@ class Base(object):
                 changed_options[key] = abspath
                 continue
 
-            changed_options[key] = os.path.abspath(val)
+            _val = os.path.abspath(val)
+            if os.path.exists(_val):
+                changed_options[key] = _val
+            else:
+                changed_options[key] = val
 
         self.fsuae_options.update(changed_options)
 
