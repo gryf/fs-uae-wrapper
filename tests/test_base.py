@@ -47,9 +47,11 @@ class TestBase(TestCase):
         bobj.clean()
         self.assertFalse(os.path.exists(self.dirname))
 
+    @mock.patch('os.path.exists')
     @mock.patch('fs_uae_wrapper.utils.get_config')
-    def test_normalize_options(self, get_config):
+    def test_normalize_options(self, get_config, os_exists):
 
+        os_exists.return_value = True
         bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})
 
         get_config.return_value = {'kickstarts_dir': '/some/path'}
@@ -91,6 +93,28 @@ class TestBase(TestCase):
         bobj.fsuae_options = utils.CmdOption()
         bobj._normalize_options()
         self.assertDictEqual(bobj.fsuae_options, {})
+
+    @mock.patch('os.path.exists')
+    @mock.patch('fs_uae_wrapper.utils.get_config')
+    def test_normalize_options_path_not_exists(self, get_config, os_exists):
+
+        os_exists.return_value = False
+        bobj = base.Base('Config.fs-uae', utils.CmdOption(), {})
+
+        get_config.return_value = {'kickstarts_dir': '/some/path'}
+        bobj._normalize_options()
+        self.assertDictEqual(bobj.fsuae_options, {})
+
+        os.chdir(self.dirname)
+        get_config.return_value = {'fmv_rom': 'bar'}
+        bobj._normalize_options()
+        self.assertDictEqual(bobj.fsuae_options, {'fmv_rom': 'bar'})
+
+        get_config.return_value = {'floppies_dir': '../some/path'}
+        bobj.fsuae_options = utils.CmdOption()
+        bobj._normalize_options()
+        self.assertDictEqual(bobj.fsuae_options,
+                             {'floppies_dir': '../some/path'})
 
     def test_set_assets_paths(self):
 

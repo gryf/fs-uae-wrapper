@@ -234,11 +234,13 @@ class TestCmdOptions(TestCase):
         self.assertListEqual(sorted(cmd.list()),
                              ['--fast_memory=4096', '--fullscreen'])
 
+    @mock.patch('os.path.exists')
     @mock.patch('os.getenv')
     @mock.patch('os.path.expandvars')
     @mock.patch('distutils.spawn.find_executable')
-    def test_interpolate_variables(self, find_exe, expandv, getenv):
+    def test_interpolate_variables(self, find_exe, expandv, getenv, os_exists):
 
+        os_exists.return_value = True
         itrpl = utils.interpolate_variables
 
         string = '$CONFIG/../path/to/smth'
@@ -264,3 +266,11 @@ class TestCmdOptions(TestCase):
                          '$BASE')
         self.assertEqual(itrpl(string, '/home/user/Config.fs-uae', 'base'),
                          'base')
+
+    @mock.patch('os.getenv')
+    @mock.patch('os.path.expandvars')
+    def test_interpolate_variables_path_not_exists(self, expandv, getenv):
+        itrpl = utils.interpolate_variables
+
+        string = '$CONFIG/../path/to/smth'
+        self.assertEqual(itrpl(string, '/home/user/Config.fs-uae'), string)
