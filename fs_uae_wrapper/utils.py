@@ -1,14 +1,11 @@
 """
 Misc utilities
 """
-from distutils import spawn
+import configparser
 import logging
 import os
+import shutil
 import subprocess
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
 
 from fs_uae_wrapper import message
 from fs_uae_wrapper import file_archive
@@ -46,7 +43,7 @@ class CmdOption(dict):
 
 def get_config_options(conf):
     """Read config file and return options as a dict"""
-    parser = configparser.SafeConfigParser()
+    parser = configparser.ConfigParser()
     try:
         parser.read(conf)
     except configparser.ParsingError:
@@ -153,10 +150,10 @@ def interpolate_variables(string, config_path, base=None):
         string = string.replace('$HOME', os.path.expandvars('$HOME'))
 
     if '$EXE' in string:
-        string = string.replace('$EXE', spawn.find_executable('fs-uae'))
+        string = string.replace('$EXE', shutil.which('fs-uae'))
 
     if '$APP' in string:
-        string = string.replace('$APP', spawn.find_executable('fs-uae'))
+        string = string.replace('$APP', shutil.which('fs-uae'))
 
     if '$DOCUMENTS' in string:
         xdg_docs = os.getenv('XDG_DOCUMENTS_DIR',

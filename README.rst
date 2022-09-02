@@ -25,7 +25,7 @@ preferably in a archive file vs a bunch of files.
 Requirements
 ============
 
-- Python (2 or 3)
+- Python 3
 - `fs-uae`_ (obviously :)
 
 Fs-uae-wrapper supports several types of archives:

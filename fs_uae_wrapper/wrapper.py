@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Wrapper for FS-UAE to perform some actions before and or after running the
 emulator, if appropriate option is enabled.
@@ -119,7 +118,3 @@ def run():
 
     if not exit_code:
         sys.exit(4)
-
-
-if __name__ == "__main__":
-    run()

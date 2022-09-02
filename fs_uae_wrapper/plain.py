@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Simple class for executing fs-uae with specified parameters. This is a
 failsafe class for running fs-uae.
