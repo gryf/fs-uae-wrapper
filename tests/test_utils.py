@@ -237,8 +237,8 @@ class TestCmdOptions(TestCase):
     @mock.patch('os.path.exists')
     @mock.patch('os.getenv')
     @mock.patch('os.path.expandvars')
-    @mock.patch('distutils.spawn.find_executable')
-    def test_interpolate_variables(self, find_exe, expandv, getenv, os_exists):
+    @mock.patch('shutil.which')
+    def test_interpolate_variables(self, which, expandv, getenv, os_exists):
 
         os_exists.return_value = True
         itrpl = utils.interpolate_variables
@@ -252,7 +252,7 @@ class TestCmdOptions(TestCase):
                          '/home/user')
 
         string = '$APP/$EXE'
-        find_exe.return_value = '/usr/bin/fs-uae'
+        which.return_value = '/usr/bin/fs-uae'
         self.assertEqual(itrpl(string, '/home/user/Config.fs-uae'),
                          '/usr/bin/fs-uae//usr/bin/fs-uae')
 

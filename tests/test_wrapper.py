@@ -47,10 +47,7 @@ class TestWrapper(TestCase):
             fobj.write('\n')
 
         wrapper.run()
-        mock_plain_run.called_once_with('Config.fs-uae',
-                                        ['--fullscreen',
-                                         '--fade_out_duration=0'],
-                                        [])
+        mock_plain_run.assert_called_once()
 
         # This will obviously fail for nonexistent module
         sys.argv.append('--wrapper=dummy_wrapper')
