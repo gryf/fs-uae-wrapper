@@ -4,6 +4,7 @@ Misc utilities
 import configparser
 import logging
 import os
+import pathlib
 import shutil
 import subprocess
 
@@ -19,8 +20,8 @@ class CmdOption(dict):
     def add(self, option):
         """parse and add option to the dictionary"""
         if not option.startswith('--'):
-            raise AttributeError("Cannot add option `%s' to the dictionary" %
-                                 option)
+            raise AttributeError(f"Cannot add option {option} to the "
+                                 f"dictionary")
         if '=' in option:
             key, val = option.split('=', 1)
             key = key[2:].strip()
@@ -35,9 +36,9 @@ class CmdOption(dict):
         ret_list = []
         for key, val in self.items():
             if val != '1':
-                ret_list.append('--%(k)s=%(v)s' % {'k': key, 'v': val})
+                ret_list.append(f'--{key}={val}')
             else:
-                ret_list.append('--%(k)s' % {'k': key})
+                ret_list.append(f'--{key}')
         return ret_list
 
 
@@ -87,7 +88,7 @@ def create_archive(arch_name, title='', params=None):
     """
     msg = ''
     if title:
-        msg = "Creating archive for `%s'. Please be patient" % title
+        msg = f"Creating archive for `{title}'. Please be patient"
     return operate_archive(arch_name, 'create', msg, params)
 
 
@@ -97,7 +98,7 @@ def extract_archive(arch_name, title='', params=None):
     """
     msg = ''
     if title:
-        msg = "Extracting files for `%s'. Please be patient" % title
+        msg = f"Extracting files for `{title}'. Please be patient"
     return operate_archive(arch_name, 'extract', msg, params)
 
 
@@ -143,8 +144,9 @@ def interpolate_variables(string, config_path, base=None):
 
     _string = string
     if '$CONFIG' in string:
-        conf_path = os.path.dirname(os.path.abspath(config_path))
-        string = os.path.abspath(string.replace('$CONFIG', conf_path))
+        conf_path = pathlib.Path(config_path).resolve().parent
+        string = str(pathlib.Path(string.replace('$CONFIG', str(conf_path)))
+                     .resolve())
 
     if '$HOME' in string:
         string = string.replace('$HOME', os.path.expandvars('$HOME'))

@@ -286,7 +286,7 @@ class TestBase(TestCase):
         which.return_value = '7z'
         bobj.all_options = {'wrapper': 'dummy',
                             'wrapper_save_state': '1'}
-        self.assertFalse(bobj._validate_options())
+        self.assertTrue(bobj._validate_options())
 
         bobj.all_options = {'wrapper': 'dummy',
                             'wrapper_save_state': '1',

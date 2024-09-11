@@ -157,8 +157,8 @@ Options used:
 
 * ``wrapper`` (required) with ``cd32`` as an value
 * ``wrapper_archive`` (required) path to the archive with CD32 iso/cue/wav
-* ``wrapper_archiver`` (conditionally required) archiver to use for storage
-  save state
+* ``wrapper_archiver`` (optional) archiver to use for storage save state -
+  default ``7z``.
 * ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
   message during extracting files
 * ``wrapper_save_state`` (optional) if set to "1", will load/archive save state
@@ -175,7 +175,7 @@ fragment of configuration file is saved as ``ChaosEngine.fs-uae``:
    [config]
    wrapper = cd32
    wrapper_archive = ChaosEngine.7z
-   wrapper_archiver = 7z
+   wrapper_archiver = zip
    wrapper_gui_msg = 1
 
    amiga_model = CD32
@@ -219,10 +219,12 @@ archive
 Options used:
 
 * ``wrapper`` (required) with ``archive`` as an value
-* ``wrapper_archive`` (required) path to the archive with assets (usually means
-  whole system directories, floppies or hard disk images)
-* ``wrapper_archiver`` (conditionally required) archiver to use for storage
-  save state
+* ``wrapper_archive`` (optional) path to the archive with assets (usually means
+  whole system directories, floppies or hard disk images), defaults to same
+  name as configuration file with some detected archive extension. Note, that
+  name is case sensitive
+* ``wrapper_archiver`` (optional) archiver to use for storage save state -
+  default ``7z``.
 * ``wrapper_gui_msg`` (optional) if set to "1", will display a graphical
   message during extracting files
 * ``wrapper_persist_data`` (optional) if set to "1", will compress (possibly
@@ -277,7 +279,8 @@ savestate
 Options used:
 
 * ``wrapper`` (required) with ``archive`` as an value
-* ``wrapper_archiver`` (required) archiver to use for storage save state
+* ``wrapper_archiver`` (optional) archiver to use for storage save state -
+  default ``7z``.
 
 This module is primarily used to run emulator with read only media attached
 (like images of floppies or uncompressed CD-ROMs) and its purpose is to

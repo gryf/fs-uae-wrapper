@@ -237,9 +237,9 @@ class Base(object):
             return True
 
         if 'wrapper_archiver' not in self.all_options:
-            logging.error("Configuration lacks of required "
-                          "`wrapper_archiver' option.")
-            return False
+            logging.warning("Configuration lacks of optional "
+                            "`wrapper_archiver' option, fall back to 7z")
+            self.all_options['wrapper_archiver'] = "7z"
 
         if not path.which(self.all_options['wrapper_archiver']):
             logging.error("Cannot find archiver `%s'.",
@@ -295,8 +295,30 @@ class ArchiveBase(Base):
         validation_result = super(ArchiveBase, self)._validate_options()
 
         if 'wrapper_archive' not in self.all_options:
-            sys.stderr.write("Configuration lacks of required "
-                             "`wrapper_archive' option.\n")
-            validation_result = False
+            logging.warning("Configuration lacks of optional `wrapper_archive'"
+                            " option.\n")
+            wrapper_archive = self._get_wrapper_archive_name()
+            if wrapper_archive is None:
+                logging.error("Configuration lacks of optional "
+                              "`wrapper_archive', cannot deduct the name by "
+                              "configuration file name.\n")
+                validation_result = False
+            self.all_options['wrapper_archive'] = wrapper_archive
 
         return validation_result
+
+    def _get_wrapper_archive_name(self):
+        """
+        Return full path to the archive name using configuration file
+        basename and appending one of the expected archive extensions.
+        """
+        basename = os.path.splitext(self.conf_file)[0]
+        file_list = os.listdir('.')
+        for fname in file_list:
+            for ext in ('.7z', '.lha', '.lzx', '.zip', '.rar', '.tar', '.tgz',
+                        '.tar.gz', '.tar.bz2', '.tar.xz'):
+                if ((basename + ext).lower() == fname.lower() and
+                    basename == os.path.splitext(fname)[0]):
+                    return fname
+        return None
+

@@ -73,7 +73,7 @@ class TestSaveState(TestCase):
         self.assertFalse(arch._validate_options())
 
         arch.all_options['wrapper'] = 'savestate'
-        self.assertFalse(arch._validate_options())
+        self.assertTrue(arch._validate_options())
 
         arch.all_options['wrapper_archiver'] = 'rar'
         self.assertTrue(arch._validate_options())

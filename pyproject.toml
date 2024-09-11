@@ -10,7 +10,7 @@ description = "Automate archives support and state saves for fs-uae"
 readme = "README.rst"
 requires-python = ">=3.8"
 keywords = ["uae", "fs-uae", "amiga", "emulator", "wrapper"]
-version = "0.9.0"
+version = "0.9.1"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
