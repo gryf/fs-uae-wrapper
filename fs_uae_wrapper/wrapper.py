@@ -27,7 +27,8 @@ def setup_logger(options):
             level = logging.DEBUG
 
     logging.basicConfig(level=level,
-                        format="%(asctime)s %(levelname)s: %(message)s")
+                        format="%(asctime)s %(levelname)s\t%(filename)s:"
+                        "%(lineno)d:\t\t%(message)s")
 
 
 def parse_args():

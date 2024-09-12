@@ -42,6 +42,7 @@ class Base(object):
             - run the emulation
             - archive save state
         """
+        logging.debug("run")
         if not self._validate_options():
             return False
 
@@ -217,6 +218,7 @@ class Base(object):
             if val.startswith('$CONFIG'):
                 abspath = utils.interpolate_variables(val, self.conf_file)
                 changed_options[key] = abspath
+                logging.info("%s: %s => %s", key, val, abspath)
                 continue
 
             _val = os.path.abspath(val)
@@ -282,6 +284,7 @@ class ArchiveBase(Base):
 
     def _extract(self):
         """Extract archive to temp dir"""
+        logging.debug("_extract")
 
         title = self._get_title()
         curdir = os.path.abspath('.')
@@ -291,6 +294,7 @@ class ArchiveBase(Base):
         return result
 
     def _validate_options(self):
+        logging.debug("_validate_options")
 
         validation_result = super(ArchiveBase, self)._validate_options()
 
@@ -312,8 +316,8 @@ class ArchiveBase(Base):
         Return full path to the archive name using configuration file
         basename and appending one of the expected archive extensions.
         """
-        basename = os.path.splitext(self.conf_file)[0]
-        file_list = os.listdir('.')
+        basename = os.path.splitext(os.path.basename(self.conf_file))[0]
+        file_list = os.listdir(os.path.dirname(self.conf_file))
         for fname in file_list:
             for ext in ('.7z', '.lha', '.lzx', '.zip', '.rar', '.tar', '.tgz',
                         '.tar.gz', '.tar.bz2', '.tar.xz'):
