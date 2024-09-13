@@ -4,7 +4,6 @@ Base class for all wrapper modules
 import logging
 import os
 import shutil
-import sys
 import tempfile
 
 from fs_uae_wrapper import utils
@@ -325,6 +324,6 @@ class ArchiveBase(Base):
             for ext in ('.7z', '.lha', '.lzx', '.zip', '.rar', '.tar', '.tgz',
                         '.tar.gz', '.tar.bz2', '.tar.xz'):
                 if ((basename + ext).lower() == fname.lower() and
-                    basename == os.path.splitext(fname)[0]):
+                   basename == os.path.splitext(fname)[0]):
                     return fname
         return None

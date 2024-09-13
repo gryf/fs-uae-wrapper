@@ -5,7 +5,6 @@ It will use compressed base image and compressed directories.
 """
 import logging
 import os
-import shutil
 
 from fs_uae_wrapper import base
 from fs_uae_wrapper import utils
@@ -62,7 +61,6 @@ class Wrapper(base.ArchiveBase):
                           "location.", base_image)
             return False
 
-        title = self._get_title()
         curdir = os.path.abspath('.')
         os.chdir(self.dir)
         result = utils.extract_archive(base_image)
@@ -97,8 +95,8 @@ class Wrapper(base.ArchiveBase):
         icon_fname = None
         for fname in os.listdir(slave_path):
             if (fname.lower().endswith('.info') and
-                os.path.splitext(slave_fname)[0].lower() ==
-                os.path.splitext(fname)[0].lower()):
+               os.path.splitext(slave_fname)[0].lower() ==
+               os.path.splitext(fname)[0].lower()):
                 icon_fname = fname
                 break
         if icon_fname is None:

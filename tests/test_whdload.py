@@ -163,7 +163,7 @@ class TestWHDLoad(TestCase):
     @mock.patch('os.chdir')
     def test_find_slave_no_slave_file(self, chdir, walk):
         walk.return_value = [(".", ('game'), ()),
-                            ('./game', (), ('foo', 'bar', 'baz'))]
+                             ('./game', (), ('foo', 'bar', 'baz'))]
         wrapper = whdload.Wrapper('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(wrapper._find_slave())
 
@@ -173,7 +173,7 @@ class TestWHDLoad(TestCase):
     def test_find_slave_no_corresponding_icon(self, chdir, walk, listdir):
         contents = ('foo', 'bar', 'baz.slave')
         walk.return_value = [(".", ('game'), ()),
-                            ('./game', (), contents)]
+                             ('./game', (), contents)]
         listdir.return_value = contents
         wrapper = whdload.Wrapper('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(wrapper._find_slave())
@@ -185,7 +185,7 @@ class TestWHDLoad(TestCase):
     def test_find_slave_success(self, chdir, walk, listdir, bopen):
         contents = ('foo', 'bar', 'baz.slave', 'baz.info')
         walk.return_value = [(".", ('game'), ()),
-                            ('./game', (), contents)]
+                             ('./game', (), contents)]
         listdir.return_value = contents
         wrapper = whdload.Wrapper('Config.fs-uae', utils.CmdOption(), {})
         self.assertTrue(wrapper._find_slave())

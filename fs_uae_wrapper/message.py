@@ -20,7 +20,7 @@ class MessageGui(tkinter.Tk):
         # Display window without decorations
         self.wm_attributes('-type', 'splash')
 
-        self.frame = ttk.Frame(self, padding=5, borderwidth=0)
+        self.frame = tkinter.ttk.Frame(self, padding=5, borderwidth=0)
         self.frame.grid()
         tkinter.ttk.Label(self.frame, text=msg, relief="ridge",
                           padding=10).grid()
