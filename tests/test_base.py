@@ -3,11 +3,7 @@ import sys
 import shutil
 from tempfile import mkstemp, mkdtemp
 from unittest import TestCase
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from fs_uae_wrapper import base
 from fs_uae_wrapper import utils
@@ -90,6 +86,11 @@ class TestBase(TestCase):
                              {'cdroms_dir': os.path.join(bobj.dir, 'path')})
 
         get_config.return_value = {'cdroms_dir': '~/path'}
+        bobj.fsuae_options = utils.CmdOption()
+        bobj._normalize_options()
+        self.assertDictEqual(bobj.fsuae_options, {})
+
+        get_config.return_value = {'random_item': 10}
         bobj.fsuae_options = utils.CmdOption()
         bobj._normalize_options()
         self.assertDictEqual(bobj.fsuae_options, {})
@@ -390,16 +391,42 @@ class TestArchiveBase(TestCase):
         self.assertFalse(bobj._extract())
         utils_extract.assert_called_once_with(self.fname, '')
 
-    def test_validate_options(self):
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._get_wrapper_archive_name')
+    def test_validate_options(self, get_wrapper_arch_name):
 
         bobj = base.ArchiveBase('Config.fs-uae', utils.CmdOption(), {})
         bobj.all_options = {}
 
         self.assertFalse(bobj._validate_options())
 
+        get_wrapper_arch_name.return_value = None
         bobj.all_options = {'wrapper': 'dummy'}
         self.assertFalse(bobj._validate_options())
 
         bobj.all_options = {'wrapper': 'dummy',
                             'wrapper_archive': 'myarchive.7z'}
         self.assertTrue(bobj._validate_options())
+
+    @mock.patch('os.listdir')
+    def test_get_wrapper_archive_name(self, os_listdir):
+        os_listdir.return_value = 'no archive among other files'.split()
+        bobj = base.ArchiveBase('Config.fs-uae', utils.CmdOption(), {})
+        bobj.all_options = {'wrapper': 'dummy'}
+        self.assertIsNone(bobj._get_wrapper_archive_name())
+
+        os_listdir.return_value = 'no config.rar among other files'.split()
+        bobj = base.ArchiveBase('Config.fs-uae', utils.CmdOption(), {})
+        bobj.all_options = {'wrapper': 'dummy'}
+        self.assertIsNone(bobj._get_wrapper_archive_name())
+
+        os_listdir.return_value = 'file Config.TAR among other files'.split()
+        bobj = base.ArchiveBase('Config.fs-uae', utils.CmdOption(), {})
+        bobj.all_options = {'wrapper': 'dummy'}
+        self.assertEqual(bobj._get_wrapper_archive_name(), 'Config.TAR')
+
+        os_listdir.return_value = 'Config.lha FooBar_1.24b_20202.7z'.split()
+        bobj = base.ArchiveBase('FooBar_1.24b_20202.fs-uae',
+                                utils.CmdOption(), {})
+        bobj.all_options = {'wrapper': 'dummy'}
+        self.assertEqual(bobj._get_wrapper_archive_name(),
+                         'FooBar_1.24b_20202.7z')

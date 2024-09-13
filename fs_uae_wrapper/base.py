@@ -297,6 +297,8 @@ class ArchiveBase(Base):
         logging.debug("_validate_options")
 
         validation_result = super(ArchiveBase, self)._validate_options()
+        if not validation_result:
+            return False
 
         if 'wrapper_archive' not in self.all_options:
             logging.warning("Configuration lacks of optional `wrapper_archive'"
@@ -325,4 +327,3 @@ class ArchiveBase(Base):
                     basename == os.path.splitext(fname)[0]):
                     return fname
         return None
-

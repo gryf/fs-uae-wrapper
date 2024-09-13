@@ -1,20 +1,12 @@
 from unittest import TestCase
 import os
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from fs_uae_wrapper import message
 
 if os.environ.get('DISPLAY'):
-    try:
-        import tkinter as tk
-        from tkinter import ttk
-    except ImportError:
-        import Tkinter as tk
-        import ttk
+    import tkinter as tk
+    from tkinter import ttk
 
 
 class TestMessage(TestCase):

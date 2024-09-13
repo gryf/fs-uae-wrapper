@@ -3,11 +3,7 @@ import sys
 from tempfile import mkstemp, mkdtemp
 from unittest import TestCase
 import shutil
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from fs_uae_wrapper import utils
 

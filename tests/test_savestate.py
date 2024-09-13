@@ -2,11 +2,7 @@ import os
 import shutil
 from tempfile import mkdtemp
 from unittest import TestCase
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from fs_uae_wrapper import savestate
 from fs_uae_wrapper import utils

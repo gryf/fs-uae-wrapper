@@ -2,11 +2,7 @@ import os
 import shutil
 from tempfile import mkdtemp
 from unittest import TestCase
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from fs_uae_wrapper import archive
 from fs_uae_wrapper import utils
@@ -26,23 +22,26 @@ class TestArchive(TestCase):
         except OSError:
             pass
 
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._get_wrapper_archive_name')
     @mock.patch('fs_uae_wrapper.path.which')
-    def test_validate_options(self, which):
+    def test_validate_options(self, which, get_wrapper_arch_name):
         which.return_value = 'unrar'
 
         arch = archive.Wrapper('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(arch._validate_options())
-        arch.all_options = {'wrapper': 'archive'}
 
-        arch.all_options['wrapper'] = 'archive'
+        get_wrapper_arch_name.return_value = None
+        arch.all_options = {'wrapper': 'archive'}
         self.assertFalse(arch._validate_options())
 
+        get_wrapper_arch_name.return_value = 'fake_arch_filename'
         arch.all_options['wrapper_archive'] = 'rar'
         self.assertTrue(arch._validate_options())
 
     @mock.patch('tempfile.mkdtemp')
     @mock.patch('fs_uae_wrapper.path.which')
     @mock.patch('fs_uae_wrapper.archive.Wrapper._make_archive')
+    @mock.patch('fs_uae_wrapper.base.ArchiveBase._get_wrapper_archive_name')
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._save_save')
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._get_saves_dir')
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._run_emulator')
@@ -50,7 +49,8 @@ class TestArchive(TestCase):
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._load_save')
     @mock.patch('fs_uae_wrapper.base.ArchiveBase._extract')
     def test_run(self, extract, load_save, copy_conf, run_emulator,
-                 get_save_dir, save_state, make_arch, which, mkdtemp):
+                 get_save_dir, save_state, get_wrapper_arch_name, make_arch,
+                 which, mkdtemp):
 
         extract.return_value = False
         load_save.return_value = False
@@ -58,6 +58,7 @@ class TestArchive(TestCase):
         run_emulator.return_value = False
         get_save_dir.return_value = False
         save_state.return_value = False
+        get_wrapper_arch_name.return_value = "fake_arch_filename"
         make_arch.return_value = False
         which.return_value = 'rar'
 

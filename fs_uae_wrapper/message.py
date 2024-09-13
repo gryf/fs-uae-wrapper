@@ -3,19 +3,15 @@ Display message in separate process
 """
 import multiprocessing as mp
 import sys
-try:
-    import tkinter as tk
-    from tkinter import ttk
-except ImportError:
-    import Tkinter as tk
-    import ttk
+import tkinter
+import tkinter.ttk
 
 
-class MessageGui(tk.Tk):
+class MessageGui(tkinter.Tk):
     """Simple gui for displaying a message"""
 
     def __init__(self, parent=None, msg=""):
-        tk.Tk.__init__(self, parent)
+        tkinter.Tk.__init__(self, parent)
 
         self.grid()
         self.resizable(False, False)
@@ -26,10 +22,11 @@ class MessageGui(tk.Tk):
 
         self.frame = ttk.Frame(self, padding=5, borderwidth=0)
         self.frame.grid()
-        ttk.Label(self.frame, text=msg, relief="ridge", padding=10).grid()
+        tkinter.ttk.Label(self.frame, text=msg, relief="ridge",
+                          padding=10).grid()
 
         if 'linux' in sys.platform:
-            style = ttk.Style()
+            style = tkinter.ttk.Style()
             style.theme_use('clam')
 
     def __call__(self):

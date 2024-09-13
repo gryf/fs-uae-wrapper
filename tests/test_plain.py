@@ -1,9 +1,5 @@
 from unittest import TestCase
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from fs_uae_wrapper import plain
 from fs_uae_wrapper import utils
