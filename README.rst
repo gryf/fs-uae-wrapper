@@ -2,7 +2,7 @@
 FS-UAE Wrapper
 ==============
 
-.. image:: https://github.com/gryf/fs-uae-wrapper/workflows/Test/badge.svg?event=push&branch=master
+.. image:: https://github.com/gryf/fs-uae-wrapper/workflows/Test/badge.svg
    :target: https://github.com/gryf/fs-uae-wrapper/actions?query=workflow%3ATest+event%3Apush+branch%3Amaster
 
 .. image:: https://img.shields.io/pypi/v/fs-uae-wrapper.svg
