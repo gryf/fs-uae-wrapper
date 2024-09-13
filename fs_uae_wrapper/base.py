@@ -177,13 +177,14 @@ class Base(object):
         Configuration file will be placed in new directory, therefore it is
         needed to calculate new paths so that emulator can find assets.
         """
-        options = ['wrapper_archive', 'accelerator_rom', 'base_dir',
-                   'cdrom_drive_0', 'cdroms_dir', 'controllers_dir',
-                   'cpuboard_flash_ext_file', 'cpuboard_flash_file',
-                   'floppies_dir', 'floppy_overlays_dir', 'fmv_rom',
-                   'graphics_card_rom', 'hard_drives_dir', 'kickstart_file',
-                   'kickstarts_dir', 'logs_dir', 'save_states_dir',
-                   'screenshots_output_dir']
+        logging.debug("_normalize_options")
+        options = ['wrapper_archive', 'wrapper_whdload_base',
+                   'accelerator_rom', 'base_dir', 'cdrom_drive_0',
+                   'cdroms_dir', 'controllers_dir', 'cpuboard_flash_ext_file',
+                   'cpuboard_flash_file', 'floppies_dir',
+                   'floppy_overlays_dir', 'fmv_rom', 'graphics_card_rom',
+                   'hard_drives_dir', 'kickstart_file', 'kickstarts_dir',
+                   'logs_dir', 'save_states_dir', 'screenshots_output_dir']
 
         for num in range(20):
             options.append('cdrom_image_%d' % num)

@@ -314,6 +314,155 @@ The steps would be as follows:
 - optionally create archive with save state (if save state directory place is
   *not* a global one)
 
+whdload
+-------
+
+Options used:
+
+* ``wrapper`` (required) with ``whdload`` as an value
+* ``wrapper_whdload_base`` (required) path to the whdload base system. Usually
+  it's minimal system containing at least whdload executables in C, and config
+  in S. Read on below for further details.
+* ``wrapper_archive`` (optional) path to the whdload archive, defaults to same
+  name as configuration file with some detected archive extension. Note, that
+  name is case sensitive
+* ``wrapper_archiver`` (optional) archiver to use for storage save state -
+  default ``7z``.
+
+This module is solely used with whdload distributed games (not just whdload
+slave files, but whole games, which can be found on several places on the
+internet).
+
+Base image
+~~~~~~~~~~
+
+To make it work, first the minimal system archive need to be prepared. There
+are few dependences to be included in such small system:
+
+- `WHDLoad`_ 18.9
+- `uaequit`_
+- `SetPatch`_ 43.6
+- ``Excecute``, ``Assign`` and whatever commands you'll be use in scripts from
+  your copy of Workbench
+- `kgiconload`_ - tool for reading icon and executing *default tool* with
+  optionally defined tool types as parameters (in this case: WHDLoad)
+- `SKick`_ optionally - for kickstart relocations. Also images of corresponding
+  kickstart ROM images will be needed.
+
+Now, the tree for the minimal image could look like that:
+
+.. code::
+   .
+   ├── C
+   │   ├── Assign
+   │   ├── DIC
+   │   ├── Execute
+   │   ├── kgiconload
+   │   ├── Patcher
+   │   ├── RawDIC
+   │   ├── SetPatch
+   │   ├── UAEquit
+   │   ├── WHDLoad
+   │   └── WHDLoadCD32
+   └── S
+       ├── startup-sequence
+       └── WHDLoad.prefs
+
+to use relocation tables you'll need to place ``Kickstarts`` drawer into Devs
+drawer, so it'll looks like this:
+
+.. code::
+   .
+   ├── C
+   │   ├── Assign
+   │   ├── …
+   │   └── WHDLoadCD32
+   ├── Devs
+   │   └── Kickstarts
+   │       ├── 39115_ROMKick.PAT
+   │       ├── 39115_ROMKick.RTB
+   │       ├── …
+   │       ├── kick40068.A4000.PAT
+   │       └── kick40068.A4000.RTB
+   └── S
+       ├── startup-sequence
+       └── WHDLoad.prefs
+
+Important: You'll need to prepare archive with base OS without top directory,
+i.e. suppose you have prepared all the files in ``/tmp/baseos``:
+
+.. code:: shell-session
+
+   $ pwd
+   /tmp
+   $ cd baseos
+   $ pwd
+   /tmp/basos
+   $ ls
+   C    S
+   $ zip -r /tmp/base.zip .
+     adding: C/ (stored 0%)
+     adding: C/Assign (deflated 31%)
+     adding: C/WHDLoadCD32 (deflated 26%)
+     adding: C/RawDIC (deflated 46%)
+     adding: C/UAEquit (deflated 39%)
+     adding: C/Execute (deflated 42%)
+     adding: C/Patcher (deflated 56%)
+     adding: C/DIC (deflated 33%)
+     adding: C/kgiconload (deflated 49%)
+     adding: C/SetPatch (deflated 39%)
+     adding: C/WHDLoad (deflated 23%)
+     adding: S/ (stored 0%)
+     adding: S/startup-sequence (deflated 36%)
+     adding: S/WHDLoad.prefs (deflated 51%)
+
+You can do it with other archivers as well, like 7z: ``7z a /tmp/base.7z .`` or
+tar with different compressions: ``tar Jcf /tmp/base.tar.xz .``, ``tar zcf
+/tmp/base.tgz .``, ``tar jcf /tmp/base.tar.bz2 .``. It should work with all
+mentioned at the beginning of this document archivers.
+
+Starting point is in ``S/startup-sequence`` file, where eventually 
+``S/whdload-startup`` is executed, which will be created by fs-uae-warpper
+before execution by fs-uae.
+
+
+Configuration
+~~~~~~~~~~~~~
+
+Now, to use whdload module with any of the WHDLoad game, you'll need to prepare
+configuration for the wrapper.
+
+Example configuration:
+
+.. code:: ini
+
+   [config]
+   wrapper = whdload
+   wrapper_whdload_base = $CONFIG/whdload_base.7z
+   # ...
+
+And execution is as usual:
+
+.. code:: shell-session
+
+   $ fs-uae-wrapper ChaosEngine_v1.2_0106.fs-uae
+
+Now, similar to the archive module, it will create temporary directory, unpack
+base image there, unpack WHDLoad game archive, search for slave file, and
+preapre ``s:whdload-startup``, and finally pass all the configuration to
+fs-uae.
+
+
+Limitations
+===========
+
+There is one limitation when using save ``wrapper_save_state`` option. In case
+of floppies it should work without any issues, although save state for running
+Workbench or WHDLoad games may or may not work. In the past there was an issue
+with `fs-uae`_ where saving state was causing data corruption on the emulated
+system. Use it with caution!
+
+
 License
 =======
 
@@ -328,3 +477,8 @@ This work is licensed on 3-clause BSD license. See LICENSE file for details.
 .. _tar: https://www.gnu.org/software/tar/
 .. _zip: http://www.info-zip.org
 .. _CheeseShop: https://pypi.python.org/pypi/fs-/fs-uae-wrapperuae-wrapper
+.. _WHDLoad: https://www.whdload.de
+.. _uaequit: https://aminet.net/package/misc/emu/UAEquit
+.. _SKick: https://aminet.net/package/util/boot/skick346
+.. _SetPatch: https://aminet.net/package/util/boot/SetPatch_43.6b
+.. _kgiconload: https://eab.abime.net/showpost.php?p=733614&postcount=92
