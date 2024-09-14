@@ -114,10 +114,10 @@ class Wrapper(base.ArchiveBase):
         # find proper way to handle slave
         # 1. check if there are user provided params
         contents = f"cd {slave_path}\n"
-        if self.fsuae_options.get('wrapper_whdload_options'):
+        if self.all_options.get('wrapper_whdload_options'):
             contents = (f"{contents}"
                         f"C:whdload "
-                        f"{self.fsuae_options['wrapper_whdload_options']} "
+                        f"{self.all_options['wrapper_whdload_options']} "
                         f"Slave={slave_fname}\n")
         else:
             # no params, find if kgiconload is available

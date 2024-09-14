@@ -225,7 +225,7 @@ class TestWHDLoad(TestCase):
         listdir.return_value = contents
         wrapper = whdload.Wrapper('Config.fs-uae', utils.CmdOption(), {})
         whdl_opts = 'Preload SplashDelay=0 MMU PAL'
-        wrapper.fsuae_options['wrapper_whdload_options'] = whdl_opts
+        wrapper.all_options['wrapper_whdload_options'] = whdl_opts
         with mock.patch('builtins.open', _open):
             self.assertTrue(wrapper._find_slave())
         handle = _open()
