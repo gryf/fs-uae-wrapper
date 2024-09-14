@@ -326,8 +326,8 @@ Options used:
   in S. Read on below for further details.
 * ``wrapper_whdload_options`` (optional) this option will replace the line in
   ``s:whdload-startup`` with specific ``whdload`` options for certain slave.
-   For reference look at WHDLoad documentation and/or on ``s:WHDLoad.prefs``.
-   Note, that ``Slave=`` option must not be used.
+  For reference look at WHDLoad documentation and/or on ``s:WHDLoad.prefs``.
+  Note, that ``Slave=`` option must not be used.
 * ``wrapper_archive`` (optional) path to the whdload archive, defaults to same
   name as configuration file with some detected archive extension. Note, that
   name is case sensitive
@@ -345,6 +345,7 @@ To make it work, first the absolute minimal image need to contain following
 structure:
 
 .. code::
+
    .
    ├── C
    │   ├── DIC
@@ -407,6 +408,7 @@ Creating base image archive
 Now, the tree for the minimal image could look like that:
 
 .. code::
+
    .
    ├── C
    │   ├── Assign
@@ -429,6 +431,7 @@ placed there as well, otherwise it may or may not work. Structure looks like
 this:
 
 .. code::
+
    .
    ├── C
    │   ├── Assign
