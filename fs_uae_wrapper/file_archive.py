@@ -123,7 +123,7 @@ class RarArchive(Archive):
 
         logging.debug("Calling `%s %s %s %s'.", self._compress,
                       " ".join(self.ADD), arch_name, " ".join(files))
-        result = subprocess.call([self._compress, *self.ADD, arch_name, 
+        result = subprocess.call([self._compress, *self.ADD, arch_name,
                                   *files])
         if result != 0:
             logging.error("Unable to create archive `%s'.", arch_name)
