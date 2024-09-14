@@ -34,7 +34,7 @@ Homepage = "https://github.com/gryf/fs-uae-wrapper"
 fs-uae-wrapper = "fs_uae_wrapper.wrapper:run"
 
 [tool.setuptools]
-py-modules = ["fs_uae_wrapper"]
+packages = ["fs_uae_wrapper"]
 
 [tool.distutils.bdist_wheel]
 universal = true

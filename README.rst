@@ -331,8 +331,6 @@ Options used:
 * ``wrapper_archive`` (optional) path to the whdload archive, defaults to same
   name as configuration file with some detected archive extension. Note, that
   name is case sensitive
-* ``wrapper_archiver`` (optional) archiver to use for storage save state -
-  default ``7z``.
 
 This module is solely used with whdload distributed games (not just whdload
 slave files, but whole games, which can be found on several places on the
@@ -365,7 +363,7 @@ where the minimum dependences are:
 - `WHDLoad`_ 18.9
 - `SetPatch`_ 43.6
 
-and the ``S/startup-sequence`` should at east contain:
+and the ``S/startup-sequence`` should at least contain:
 
 .. code::
 
@@ -509,7 +507,7 @@ And execution is as usual:
 
 Now, similar to the archive module, it will create temporary directory, unpack
 base image there, unpack WHDLoad game archive, search for slave file, and
-preapre ``s:whdload-startup``, and finally pass all the configuration to
+prepare ``s:whdload-startup``, and finally pass all the configuration to
 fs-uae.
 
 
