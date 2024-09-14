@@ -82,7 +82,7 @@ class Base(object):
         """execute fs-uae"""
         curdir = os.path.abspath('.')
         os.chdir(self.dir)
-        utils.run_command(['fs-uae'] + self.fsuae_options.list())
+        utils.run_command(['fs-uae', *self.fsuae_options.list()])
         os.chdir(curdir)
         return True
 

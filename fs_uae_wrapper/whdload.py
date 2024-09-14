@@ -80,12 +80,20 @@ class Wrapper(base.ArchiveBase):
         # find slave name
         slave_fname = None
         slave_path = None
+        case_insensitvie_map = {}
 
-        for root, dirs, fnames in os.walk('.'):
+        # build case insensitive map of paths and find the slave file
+        for root, dirnames, fnames in os.walk('.'):
+            for dirname in dirnames:
+                full_path = os.path.normpath(os.path.join(root, dirname))
+                case_insensitvie_map[full_path.lower()] = full_path
+
             for fname in fnames:
-                if fname.lower().endswith('.slave'):
+                full_path = os.path.normpath(os.path.join(root, fname))
+                case_insensitvie_map[full_path.lower()] = full_path
+                if not slave_fname and fname.lower().endswith('.slave'):
                     slave_path, slave_fname = os.path.normpath(root), fname
-                    break
+
         if slave_fname is None:
             logging.error("Cannot find .slave file in archive.")
             return False
@@ -103,10 +111,26 @@ class Wrapper(base.ArchiveBase):
                           "archive.", slave_fname)
             return False
 
-        # Write startup file
-        with open("S/whdload-startup", "w") as fobj:
-            fobj.write(f"cd {slave_path}\n")
-            fobj.write(f"C:kgiconload {icon_fname}\n")
+        # find proper way to handle slave
+        # 1. check if there are user provided params
+        contents = f"cd {slave_path}\n"
+        if self.fsuae_options.get('wrapper_whdload_options'):
+            contents = (f"{contents}"
+                        f"C:whdload "
+                        f"{self.fsuae_options['wrapper_whdload_options']} "
+                        f"Slave={slave_fname}\n")
+        else:
+            # no params, find if kgiconload is available
+            if case_insensitvie_map.get('c/kgiconload'):
+                contents = f"{contents}C:kgiconload {icon_fname}\n"
+            else:
+                # if not, just add common defaults
+                contents = (f"{contents}C:whdload Preload "
+                            f"Slave={slave_fname}\n")
+
+        fname = os.path.join(case_insensitvie_map.get('s'), 'whdload-startup')
+        with open(fname, "w") as fobj:
+            fobj.write(contents)
 
         os.chdir(curdir)
         return True

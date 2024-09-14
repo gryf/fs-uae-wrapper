@@ -137,6 +137,7 @@ Currently, couple of wrapper modules are available:
 - cd32
 - archive
 - savestate
+- whdload
 
 plain
 -----
@@ -323,6 +324,10 @@ Options used:
 * ``wrapper_whdload_base`` (required) path to the whdload base system. Usually
   it's minimal system containing at least whdload executables in C, and config
   in S. Read on below for further details.
+* ``wrapper_whdload_options`` (optional) this option will replace the line in
+  ``s:whdload-startup`` with specific ``whdload`` options for certain slave.
+   For reference look at WHDLoad documentation and/or on ``s:WHDLoad.prefs``.
+   Note, that ``Slave=`` option must not be used.
 * ``wrapper_archive`` (optional) path to the whdload archive, defaults to same
   name as configuration file with some detected archive extension. Note, that
   name is case sensitive
@@ -336,18 +341,68 @@ internet).
 Base image
 ~~~~~~~~~~
 
-To make it work, first the minimal system archive need to be prepared. There
-are few dependences to be included in such small system:
+To make it work, first the absolute minimal image need to contain following
+structure:
 
+.. code::
+   .
+   ├── C
+   │   ├── DIC
+   │   ├── Execute
+   │   ├── Patcher
+   │   ├── RawDIC
+   │   ├── SetPatch
+   │   ├── WHDLoad
+   │   └── WHDLoadCD32
+   └── S
+       ├── startup-sequence
+       └── WHDLoad.prefs
+
+where the minimum dependences are:
+
+- ``Excecute`` from your copy of Workbench
 - `WHDLoad`_ 18.9
-- `uaequit`_
 - `SetPatch`_ 43.6
-- ``Excecute``, ``Assign`` and whatever commands you'll be use in scripts from
-  your copy of Workbench
+
+and the ``S/startup-sequence`` should at east contain:
+
+.. code::
+
+   setpatch QUIET
+
+   IF EXISTS S:whdload-startup
+     Execute S:whdload-startup
+   EndIF
+
+To leverage more pleasant UX, additionally those bits should be installed (or -
+copied into base image filesystem):
+
+- ``Assign`` and whatever commands you'll be use in scripts from your copy of
+- `uaequit`_ - this will allow to quit emulator, after quiting game
+  Workbench
 - `kgiconload`_ - tool for reading icon and executing *default tool* with
   optionally defined tool types as parameters (in this case: WHDLoad)
 - `SKick`_ optionally - for kickstart relocations. Also images of corresponding
   kickstart ROM images will be needed.
+
+
+and then ``s/startup-sequence`` might looks a follows:
+
+.. code::
+
+   Assign >NIL: ENV: RAM:
+   Assign >NIL: T: RAM:
+
+   setpatch QUIET
+
+   IF EXISTS S:whdload-startup
+     Execute S:whdload-startup
+   EndIF
+
+   C:UAEquit
+
+Creating base image archive
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now, the tree for the minimal image could look like that:
 
@@ -369,7 +424,9 @@ Now, the tree for the minimal image could look like that:
        └── WHDLoad.prefs
 
 to use relocation tables you'll need to place ``Kickstarts`` drawer into Devs
-drawer, so it'll looks like this:
+drawer. Also keep in mind, that corresponding kickstart rom images need to be
+placed there as well, otherwise it may or may not work. Structure looks like
+this:
 
 .. code::
    .
@@ -421,7 +478,7 @@ tar with different compressions: ``tar Jcf /tmp/base.tar.xz .``, ``tar zcf
 /tmp/base.tgz .``, ``tar jcf /tmp/base.tar.bz2 .``. It should work with all
 mentioned at the beginning of this document archivers.
 
-Starting point is in ``S/startup-sequence`` file, where eventually 
+Starting point is in ``S/startup-sequence`` file, where eventually
 ``S/whdload-startup`` is executed, which will be created by fs-uae-warpper
 before execution by fs-uae.
 

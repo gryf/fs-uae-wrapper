@@ -176,15 +176,58 @@ class TestWHDLoad(TestCase):
         wrapper = whdload.Wrapper('Config.fs-uae', utils.CmdOption(), {})
         self.assertFalse(wrapper._find_slave())
 
-    @mock.patch('builtins.open')
     @mock.patch('os.listdir')
     @mock.patch('os.walk')
     @mock.patch('os.chdir')
-    def test_find_slave_success(self, chdir, walk, listdir, bopen):
+    def test_find_slave_success(self, chdir, walk, listdir):
         contents = ('foo', 'bar', 'baz.slave', 'baz.info')
-        walk.return_value = [(".", ('game'), ()),
+        _open = mock.mock_open()
+        walk.return_value = [(".", ('C', 'S', 'game'), ()),
+                             ('./C', (), ('Assign', 'kgiconload')),
+                             ('./S', (), ()),
                              ('./game', (), contents)]
         listdir.return_value = contents
         wrapper = whdload.Wrapper('Config.fs-uae', utils.CmdOption(), {})
-        self.assertTrue(wrapper._find_slave())
-        bopen.assert_called_once()
+        with mock.patch('builtins.open', _open):
+            self.assertTrue(wrapper._find_slave())
+        handle = _open()
+        handle.write.assert_called_once_with('cd game\n'
+                                             'C:kgiconload baz.info\n')
+
+    @mock.patch('os.listdir')
+    @mock.patch('os.walk')
+    @mock.patch('os.chdir')
+    def test_find_slave_minial(self, chdir, walk, listdir):
+        contents = ('foo', 'bar', 'baz.slave', 'baz.info')
+        _open = mock.mock_open()
+        walk.return_value = [(".", ('C', 'S', 'game'), ()),
+                             ('./C', (), ('Assign', 'WHDLoad')),
+                             ('./S', (), ()),
+                             ('./game', (), contents)]
+        listdir.return_value = contents
+        wrapper = whdload.Wrapper('Config.fs-uae', utils.CmdOption(), {})
+        with mock.patch('builtins.open', _open):
+            self.assertTrue(wrapper._find_slave())
+        handle = _open()
+        handle.write.assert_called_once_with('cd game\nC:whdload Preload '
+                                             'Slave=baz.slave\n')
+
+    @mock.patch('os.listdir')
+    @mock.patch('os.walk')
+    @mock.patch('os.chdir')
+    def test_find_custom_options(self, chdir, walk, listdir):
+        contents = ('foo', 'bar', 'baz.slave', 'baz.info')
+        _open = mock.mock_open()
+        walk.return_value = [(".", ('C', 'S', 'game'), ()),
+                             ('./C', (), ('Assign', 'WHDLoad')),
+                             ('./S', (), ()),
+                             ('./game', (), contents)]
+        listdir.return_value = contents
+        wrapper = whdload.Wrapper('Config.fs-uae', utils.CmdOption(), {})
+        whdl_opts = 'Preload SplashDelay=0 MMU PAL'
+        wrapper.fsuae_options['wrapper_whdload_options'] = whdl_opts
+        with mock.patch('builtins.open', _open):
+            self.assertTrue(wrapper._find_slave())
+        handle = _open()
+        handle.write.assert_called_once_with(f'cd game\nC:whdload {whdl_opts} '
+                                             'Slave=baz.slave\n')

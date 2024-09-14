@@ -11,8 +11,8 @@ from fs_uae_wrapper import path
 
 class Archive(object):
     """Base class for archive support"""
-    ADD = ['a']
-    EXTRACT = ['x']
+    ADD = ('a',)
+    EXTRACT = ('x',)
     ARCH = 'false'
 
     def __init__(self):
@@ -27,8 +27,8 @@ class Archive(object):
         files = files if files else ['.']
         logging.debug("Calling `%s %s %s %s'.", self._compress,
                       " ".join(self.ADD), arch_name, " ".join(files))
-        result = subprocess.call([self._compress] + self.ADD + [arch_name]
-                                 + files)
+        result = subprocess.call([self._compress, *self.ADD, arch_name,
+                                  *files])
         if result != 0:
             logging.error("Unable to create archive `%s'.", arch_name)
             return False
@@ -44,8 +44,7 @@ class Archive(object):
 
         logging.debug("Calling `%s %s %s'.", self._compress,
                       " ".join(self.ADD), arch_name)
-        result = subprocess.call([self._decompress] + self.EXTRACT +
-                                 [arch_name])
+        result = subprocess.call([self._decompress, *self.EXTRACT, arch_name])
         if result != 0:
             logging.error("Unable to extract archive `%s'.", arch_name)
             return False
@@ -53,16 +52,16 @@ class Archive(object):
 
 
 class TarArchive(Archive):
-    ADD = ['cf']
-    EXTRACT = ['xf']
+    ADD = ('cf',)
+    EXTRACT = ('xf',)
     ARCH = 'tar'
 
     def create(self, arch_name, files=None):
         files = files if files else sorted(os.listdir('.'))
         logging.debug("Calling `%s %s %s %s'.", self._compress,
                       " ".join(self.ADD), arch_name, " ".join(files))
-        result = subprocess.call([self._compress] + self.ADD + [arch_name] +
-                                 files)
+        result = subprocess.call([self._compress, *self.ADD, arch_name,
+                                  *files])
         if result != 0:
             logging.error("Unable to create archive `%s'.", arch_name)
             return False
@@ -70,15 +69,15 @@ class TarArchive(Archive):
 
 
 class TarGzipArchive(TarArchive):
-    ADD = ['zcf']
+    ADD = ('zcf',)
 
 
 class TarBzip2Archive(TarArchive):
-    ADD = ['jcf']
+    ADD = ('jcf',)
 
 
 class TarXzArchive(TarArchive):
-    ADD = ['Jcf']
+    ADD = ('Jcf',)
 
 
 class LhaArchive(Archive):
@@ -86,8 +85,8 @@ class LhaArchive(Archive):
 
 
 class ZipArchive(Archive):
-    ADD = ['a', '-tzip']
-    ARCH = ['7z', 'zip']
+    ADD = ('a', '-tzip')
+    ARCH = ('7z', 'zip')
 
     def __init__(self):
         super(ZipArchive, self).__init__()
@@ -102,7 +101,7 @@ class SevenZArchive(Archive):
 
 
 class LzxArchive(Archive):
-    EXTRACT = ['-x']
+    EXTRACT = ('-x',)
     ARCH = 'unlzx'
 
     @classmethod
@@ -113,7 +112,7 @@ class LzxArchive(Archive):
 
 
 class RarArchive(Archive):
-    ARCH = ['rar', 'unrar']
+    ARCH = ('rar', 'unrar')
 
     def create(self, arch_name, files=None):
         files = files if files else sorted(os.listdir('.'))
@@ -124,8 +123,8 @@ class RarArchive(Archive):
 
         logging.debug("Calling `%s %s %s %s'.", self._compress,
                       " ".join(self.ADD), arch_name, " ".join(files))
-        result = subprocess.call([self._compress] + self.ADD + [arch_name] +
-                                 files)
+        result = subprocess.call([self._compress, *self.ADD, arch_name, 
+                                  *files])
         if result != 0:
             logging.error("Unable to create archive `%s'.", arch_name)
             return False
@@ -134,7 +133,7 @@ class RarArchive(Archive):
 
 class Archivers(object):
     """Archivers class"""
-    archivers = [{'arch': TarArchive, 'name': 'tar', 'ext': ['tar']},
+    archivers = ({'arch': TarArchive, 'name': 'tar', 'ext': ['tar']},
                  {'arch': TarGzipArchive, 'name': 'tgz',
                   'ext': ['tar.gz', 'tgz']},
                  {'arch': TarBzip2Archive, 'name': 'tar.bz2',
@@ -144,7 +143,7 @@ class Archivers(object):
                  {'arch': SevenZArchive, 'name': '7z', 'ext': ['7z']},
                  {'arch': ZipArchive, 'name': 'zip', 'ext': ['zip']},
                  {'arch': LhaArchive, 'name': 'lha', 'ext': ['lha', 'lzh']},
-                 {'arch': LzxArchive, 'name': 'lzx', 'ext': ['lzx']}]
+                 {'arch': LzxArchive, 'name': 'lzx', 'ext': ['lzx']})
 
     @classmethod
     def get(cls, extension):

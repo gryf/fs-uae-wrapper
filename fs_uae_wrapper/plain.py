@@ -16,8 +16,8 @@ class Wrapper(base.Base):
 
     def _run_emulator(self):
         """execute fs-uae"""
-        utils.run_command(['fs-uae'] + [self.conf_file] +
-                          self.fsuae_options.list())
+        utils.run_command(['fs-uae', self.conf_file,
+                           *self.fsuae_options.list()])
 
     def clean(self):
         """Do the cleanup. Here - just do nothing"""
