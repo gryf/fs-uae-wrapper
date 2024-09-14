@@ -7,8 +7,7 @@ import logging
 import os
 import sys
 
-from fs_uae_wrapper import utils
-from fs_uae_wrapper import WRAPPER_KEY
+from fs_uae_wrapper import WRAPPER_KEY, utils
 
 
 def setup_logger(options):

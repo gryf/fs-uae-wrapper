@@ -8,8 +8,7 @@ import pathlib
 import shutil
 import subprocess
 
-from fs_uae_wrapper import message
-from fs_uae_wrapper import file_archive
+from fs_uae_wrapper import file_archive, message
 
 
 class CmdOption(dict):

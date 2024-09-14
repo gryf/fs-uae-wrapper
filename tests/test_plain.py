@@ -1,8 +1,6 @@
-from unittest import TestCase
-from unittest import mock
+from unittest import TestCase, mock
 
-from fs_uae_wrapper import plain
-from fs_uae_wrapper import utils
+from fs_uae_wrapper import plain, utils
 
 
 class TestPlainModule(TestCase):

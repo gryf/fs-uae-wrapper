@@ -1,12 +1,10 @@
 import os
-import sys
 import shutil
-from tempfile import mkstemp, mkdtemp
-from unittest import TestCase
-from unittest import mock
+import sys
+from tempfile import mkdtemp, mkstemp
+from unittest import TestCase, mock
 
-from fs_uae_wrapper import base
-from fs_uae_wrapper import utils
+from fs_uae_wrapper import base, utils
 
 
 class TestBase(TestCase):

@@ -1,10 +1,10 @@
 """
 File archive classes
 """
-import os
-import subprocess
-import re
 import logging
+import os
+import re
+import subprocess
 
 from fs_uae_wrapper import path
 

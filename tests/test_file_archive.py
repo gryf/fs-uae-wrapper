@@ -1,8 +1,7 @@
 import os
 import shutil
 from tempfile import mkdtemp
-from unittest import TestCase
-from unittest import mock
+from unittest import TestCase, mock
 
 from fs_uae_wrapper import file_archive
 

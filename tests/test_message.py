@@ -1,6 +1,5 @@
-from unittest import TestCase
 import os
-from unittest import mock
+from unittest import TestCase, mock
 
 from fs_uae_wrapper import message
 

@@ -6,8 +6,7 @@ It will use compressed base image and compressed directories.
 import logging
 import os
 
-from fs_uae_wrapper import base
-from fs_uae_wrapper import utils
+from fs_uae_wrapper import base, utils
 
 
 class Wrapper(base.ArchiveBase):

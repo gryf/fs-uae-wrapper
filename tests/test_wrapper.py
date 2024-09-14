@@ -1,9 +1,8 @@
 import os
-import sys
-from tempfile import mkstemp, mkdtemp
-from unittest import TestCase
 import shutil
-from unittest import mock
+import sys
+from tempfile import mkdtemp, mkstemp
+from unittest import TestCase, mock
 
 from fs_uae_wrapper import wrapper
 

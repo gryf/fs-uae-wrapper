@@ -38,3 +38,11 @@ py-modules = ["fs_uae_wrapper"]
 
 [tool.distutils.bdist_wheel]
 universal = true
+
+[tool.ruff.lint]
+select = [
+    "F",   # pyflakes
+    "E",   # pycodestyle
+    "I",   # isort
+    "RUF", # ruff-specific rules
+]

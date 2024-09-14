@@ -2,8 +2,7 @@
 Simple class for executing fs-uae with specified parameters. This is a
 failsafe class for running fs-uae.
 """
-from fs_uae_wrapper import base
-from fs_uae_wrapper import utils
+from fs_uae_wrapper import base, utils
 
 
 class Wrapper(base.Base):

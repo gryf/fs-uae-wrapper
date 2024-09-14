@@ -6,8 +6,7 @@ import os
 import shutil
 import tempfile
 
-from fs_uae_wrapper import utils
-from fs_uae_wrapper import path
+from fs_uae_wrapper import path, utils
 
 
 class Base(object):
