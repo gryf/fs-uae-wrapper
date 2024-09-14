@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = ["setuptools >= 61.0", "wheel", "setuptools-git-versioning"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -10,7 +10,7 @@ description = "Automate archives support and state saves for fs-uae"
 readme = "README.rst"
 requires-python = ">=3.8"
 keywords = ["uae", "fs-uae", "amiga", "emulator", "wrapper"]
-version = "0.10.0"
+dynamic = ["version"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
@@ -38,6 +38,9 @@ py-modules = ["fs_uae_wrapper"]
 
 [tool.distutils.bdist_wheel]
 universal = true
+
+[tool.setuptools-git-versioning]
+enabled = true
 
 [tool.ruff.lint]
 select = [
