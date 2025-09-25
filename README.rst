@@ -377,8 +377,8 @@ To leverage more pleasant UX, additionally those bits should be installed (or -
 copied into base image filesystem):
 
 - ``Assign`` and whatever commands you'll be use in scripts from your copy of
-- `uaequit`_ - this will allow to quit emulator, after quiting game
   Workbench
+- `uaequit`_ - this will allow to quit emulator, after quiting game
 - `kgiconload`_ - tool for reading icon and executing *default tool* with
   optionally defined tool types as parameters (in this case: WHDLoad)
 - `SKick`_ optionally - for kickstart relocations. Also images of corresponding

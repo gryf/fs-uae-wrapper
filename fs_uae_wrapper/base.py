@@ -44,7 +44,7 @@ class Base(object):
         if not self._validate_options():
             return False
 
-        self.dir = tempfile.mkdtemp()
+        self.dir = tempfile.mkdtemp(prefix='fs-uae-wrapper-')
         self._normalize_options()
         self._set_assets_paths()
 
