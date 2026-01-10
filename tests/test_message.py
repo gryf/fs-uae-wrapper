@@ -2,6 +2,7 @@ import os
 from unittest import TestCase, mock
 
 from fs_uae_wrapper import message
+from fs_uae_wrapper import nogui_message
 
 if os.environ.get('DISPLAY'):
     import tkinter as tk
@@ -36,6 +37,19 @@ class TestMessage(TestCase):
         msg._process.is_alive.assert_called_once()
         msg._process.terminate.assert_not_called()
         msg._process.join.assert_called_once()
+
+
+class TestNOPMessage(TestCase):
+
+    @mock.patch('sys.stdout.write')
+    def test_show(self, stdout_write):
+        msg = nogui_message.Message('display that')
+        msg.show()
+        stdout_write.assert_called_once()
+
+    def test_close(self):
+        msg = nogui_message.Message('display that')
+        self.assertIsNone(msg.close())
 
 
 if os.environ.get('DISPLAY'):

@@ -8,7 +8,11 @@ import pathlib
 import shutil
 import subprocess
 
-from fs_uae_wrapper import file_archive, message
+from fs_uae_wrapper import file_archive
+try:
+    from fs_uae_wrapper.message import Message
+except ModuleNotFoundError:
+    from fs_uae_wrapper.nogui_message import Message
 
 
 class CmdOption(dict):
@@ -64,7 +68,7 @@ def operate_archive(arch_name, operation, text, params):
     if archiver is None:
         return False
 
-    msg = message.Message(text)
+    msg = Message(text)
     if text:
         msg.show()
 
